@@ -1,5 +1,6 @@
+const format = require('pg-format');
 const db = require('../../db/connection.js');
-const { values } = require('../data/development-data/categories.js');
+const { formatData } = require('../utils/data-manipulation');
 
 
 const dropTables = async () => {
@@ -18,7 +19,7 @@ const createTables = async () => {
     await db.query(`CREATE TABLE users
     (username VARCHAR(200) NOT NULL PRIMARY KEY,
     avatar_url TEXT,
-    name VARCHAR(100));`)
+    name VARCHAR(200));`)
 
 
     await db.query(`CREATE TABLE reviews
@@ -44,17 +45,46 @@ const createTables = async () => {
 
 const insertCategories = async (categoryData) => {
     const formattedCategoryData = formatData(categoryData) //formatData returns array of property values
-
     const queryStr = format(`INSERT INTO categories
-        ('slug' 'description')
+        (slug, description)
         VALUES
         %L 
          RETURNING *;`, formattedCategoryData);
+          return await (await db.query(queryStr)).rows;
+};
 
-
-     const insertedCategoryData = await db.query(queryStr)
-     return insertedCategoryData;
-
+const insertUsers = async (userData) => {
+    const formattedUserData = formatData(userData)
+    const queryStr = format(`INSERT INTO users
+    (username, avatar_url, name)
+    VALUES
+    %L
+    RETURNING *;`, formattedUserData);
+    const result =  await db.query(queryStr);
+    return result.rows;
 }
 
-module.exports = { dropTables, createTables };
+const insertReviews = async (reviewData) => {
+    // console.log(reviewData);
+    const formattedReviewData = formatData(reviewData);
+    const queryStr = format(`INSERT INTO reviews
+    (title, designer, owner, review_img_url, review_body, category, created_at, votes)
+    VALUES
+    %L
+    RETURNING *;`, formattedReviewData);
+    const result = await db.query(queryStr);
+    return result.rows;
+}
+
+const insertComments = async (newCommentData) => {
+    const formattedCommentData = formatData(newCommentData);
+    const queryStr = format(`INSERT INTO comments
+    (body, votes, created_at, author, review_id)
+    VALUES
+    %L
+    RETURNING *;`, formattedCommentData);
+    const result = await db.query(queryStr);
+    return result.rows;
+}
+
+module.exports = { dropTables, createTables, insertCategories, insertUsers, insertReviews, insertComments };
