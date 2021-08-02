@@ -23,5 +23,7 @@
     "dotenv": "^10.0.0",
     "pg": "^8.7.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "jest": "^27.0.6"
+  }
 }
