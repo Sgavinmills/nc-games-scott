@@ -19,10 +19,6 @@ describe('formatData()', () => {
         const input = [{ slug: 'euro game', description: 'Abstact games that involve little luck' }, { slug: "children's games", description: 'Games suitable for children' }]
         expect(formatData(input)).toEqual([['euro game', 'Abstact games that involve little luck'], [`children's games`, `Games suitable for children`]])
     })
-    test('Returns nested array of object values for objects with more properties', () => {
-        const input = [{ slug: 'euro game', description: 'Abstact games that involve little luck' }, { slug: "children's games", description: 'Games suitable for children' }, { slug: 'euro game', description: 'Abstact games that involve little luck' }];
-        expect(formatData(input)).toEqual([['euro game', 'Abstact games that involve little luck'], ["children's games", 'Games suitable for children'], ['euro game', 'Abstact games that involve little luck']]);
-    })
 });
 
 describe('createRefObj()', () => {
