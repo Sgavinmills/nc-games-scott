@@ -1,38 +1,76 @@
 const db = require('../../db/connection.js');
-const { createRefObj } = require('../utils/data-manipulation.js');
-const { dropTables, createTables, insertCategories, insertUsers, insertReviews, insertComments} = require('./manageTables.js');
+const { createRefObj, updateObjectPropertyFromRef, formatData } = require('../utils/data-manipulation.js');
+const { dropTables, insertData, createTables } = require('../utils/manageTables.js');
 
-const seed = async ({ categoryData, commentData, reviewData, userData } ) => {
+
+const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
+  console.log('-----Seeding started-----\n')
   
-  await dropTables();
-  console.log('4 tables dropped');
-  await createTables();
-  console.log('All 4 tables created');
-  await insertCategories(categoryData);
-  await insertUsers(userData);
-  const reviewInsert = await insertReviews(reviewData);
+  //drop all tables
+  const tblNamesToDrop = ['comments', 'reviews', 'categories', 'users'];
+  await dropTables(tblNamesToDrop);
+  console.log(`Dropped tables: ${tblNamesToDrop}`)
 
-  const refObj = createRefObj(reviewInsert, 'title', 'review_id');
-  const newCommentData = [];
-  
-  commentData.forEach((comment) => {
-    let copy = {...comment};
-    copy.author = copy.created_by;
-    delete copy.created_by;
-    copy.review_id = refObj[copy.belongs_to];
-    delete copy.belongs_to;
-    newCommentData.push(copy);
-    
-  })
-  const insertedComms = await insertComments(newCommentData);
-  console.log(insertedComms);
+  //Build table column headers
+  const categoriesColumns = [
+    'slug VARCHAR(200) NOT NULL PRIMARY KEY',
+    'description TEXT',
+  ];
+  const usersColumns = [
+    'username VARCHAR(200) NOT NULL PRIMARY KEY',
+    'avatar_url TEXT',
+    'name VARCHAR(200)'
+  ];
+  const reviewsColumns = [
+    'review_id SERIAL PRIMARY KEY',
+    'title VARCHAR(100) NOT NULL',
+    'review_body TEXT NOT NULL',
+    'designer TEXT',
+    `review_img_url TEXT DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg'`,
+    `votes INT DEFAULT 0`,
+    `category VARCHAR(200) REFERENCES categories(slug)`,
+    `owner VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE`,
+    `created_at TIMESTAMP`
+  ];
+  const commentsColumns = [
+    `comment_id SERIAL PRIMARY KEY`,
+    `author VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE`,
+    `review_id INT REFERENCES reviews(review_id)`,
+    `votes INT DEFAULT 0`,
+    `created_at TIMESTAMP`,
+    `body TEXT NOT NULL`
+  ];
+
+  //create tables
+  const tablesCreated = await createTables([['categories',categoriesColumns], ['users',usersColumns], ['reviews',reviewsColumns], ['comments',commentsColumns]]);
+  console.log(`${tablesCreated} tables created`);
 
 
+  //insert all data
+  const formattedCategoryData = formatData(categoryData) 
+  const catTableCreation = ['categories', ['slug','description'], formattedCategoryData];
 
+  const formattedUserData = formatData(userData);
+  const userTableCreation = ['users', ['username','avatar_url','name'], formattedUserData];
 
+  const formattedReviewData = formatData(reviewData);
+  const reviewTableCreation = ['reviews', ['title', 'designer', 'owner', 'review_img_url', 'review_body', 'category', 'created_at', 'votes'], formattedReviewData]
 
-  // console.log(commentData);
+  const insertedData = await insertData([catTableCreation, userTableCreation, reviewTableCreation]);
+  console.log(`Inserted data into ${insertedData.length} tables`);
+
+  const refObj = createRefObj(insertedData[2], 'title', 'review_id');
+  const fixedCommentData = updateObjectPropertyFromRef(commentData, refObj, 'belongs_to', 'review_id');
+  const formattedCommentData = formatData(fixedCommentData);
+  const commentTableCreation = ['comments', ['body', 'author', 'votes', 'created_at', 'review_id'], formattedCommentData];
+
+  const insertedCommentData = await insertData([commentTableCreation])
+  console.log(`Inserted data into ${insertedCommentData.length} tables`);
+
+  console.log('\n-----Seeding finished-----')
 };
 
 
 module.exports = seed;
+
+
