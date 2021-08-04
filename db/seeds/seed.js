@@ -23,7 +23,7 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   ];
   const reviewsColumns = [
     'review_id SERIAL PRIMARY KEY',
-    'title VARCHAR(100) NOT NULL',
+    'title VARCHAR(100) COLLATE "C" NOT NULL',
     'review_body TEXT NOT NULL',
     'designer VARCHAR(100)',
     `review_img_url VARCHAR(200) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg'`,
@@ -34,10 +34,10 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   ];
   const commentsColumns = [
     `comment_id SERIAL PRIMARY KEY`,
-    `author VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE`,
+    `author VARCHAR(200) NOT NULL REFERENCES users(username) ON DELETE CASCADE`,
     `review_id INT REFERENCES reviews(review_id)`,
     `votes INT DEFAULT 0`,
-    `created_at TIMESTAMP`,
+    `created_at TIMESTAMP DEFAULT NOW()`,
     `body VARCHAR(2000) NOT NULL`
   ];
 
