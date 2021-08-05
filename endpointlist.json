@@ -21,7 +21,9 @@
                 "queries": [
                     "category",
                     "sort_by",
-                    "order"
+                    "order",
+                    "limit",
+                    "p"
                 ],
                 "exampleResponse": {
                     "reviews": [
@@ -34,7 +36,8 @@
                             "created_at": 1610964101251,
                             "votes": 5
                         }
-                    ]
+                    ],
+                    "total_count" : 27
                 }
             },
             "/api/reviews/:review_id": {
@@ -79,6 +82,15 @@
                           "username": "grumpy19"
                         }]
                 }
+            },
+            "/api/users/:username" : {
+                "description" : "Serves a user object associated with username",
+                "queries" : [],
+                "exampleResponse" : {
+                    "username" : "mallionaire",
+                    "avatar_url" : "https://www.example.com",
+                    "name" : "Haz"
+                }
             }
         },
         "POST": {
@@ -102,7 +114,7 @@
         },
         "PATCH": {
             "/api/reviews/:review_id" : {
-                "description" : "Allows changing of votes",
+                "description" : "Allows changing of votes on a review",
                 "exampleRequestBody" : {
                      "inc_votes": -2 
                 },
@@ -118,6 +130,20 @@
                         "owner": "tickle122",
                         "created_at": "2021-01-18T10:00:20.514Z"
                       }
+                }
+            },
+            "/api/comments/:comment_id" : {
+                "description" : "Allows changing of votes on a comment",
+                "exampleRequestBody" : {
+                    "inc_votes" : 2
+                },
+                "exampleResponse" : {
+                    "comment_id" : 1,
+                    "author" : "bainesface",
+                    "review_id" : 2,
+                    "votes" : 21,
+                    "created_at" : "2017-11-22T12:43:33.389Z",
+                    "body" : "I loved this game too!"
                 }
             }
         },

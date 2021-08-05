@@ -16,6 +16,10 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
         res.status(404).send( { message : `One of your values contradicts a foreign key constraint` })
     } else if(err.code === '22001') { //value too long for type char(2000)
         res.status(400).send( { message : 'Value too long'})
+    } else if(err.code === '2201W') {
+        res.status(400).send( { message : err.message })
+    } else if(err.code === '2201X') {
+        res.status(400).send( { message : "page must be 1 or more" })
     }
     else next(err);
 }

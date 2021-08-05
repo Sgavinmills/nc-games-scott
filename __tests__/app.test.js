@@ -496,7 +496,7 @@ describe('PATCH /api/comments/:comment_id', () => {
 
 })
 
-describe('/api/reviews Pagination', () => {
+describe('GET /api/reviews Pagination', () => {
     test('status 200 - reviews results allows limit query', async () => {
         const response = await request(app).get('/api/reviews?limit=11').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
@@ -514,14 +514,46 @@ describe('/api/reviews Pagination', () => {
             }))            
         })
     })
+    test('status 200 - adds a total review count to response', async () => {
+        const response = await request(app).get('/api/reviews?limit=11').expect(200);
+        expect(response.body.total_count).toBe(13);
+    })
     //no need to test for defaults as all the previous tests still pass (after changing all the array lenghts to 10)
     test('status 200 - reviews results allows "p" page query', async () => {
         const response = await request(app).get('/api/reviews?p=2&sort_by=review_id&order=asc').expect(200);
         expect(response.body.reviews).toHaveLength(3);
         expect(response.body.reviews[0].review_id).toBe(11);        
     })
-    //page without limit
-    //limit invalid data type
-    //limit negative number
+    test('status 400 - invalid limit data type', async () => {
+        const response = await request(app).get('/api/reviews?limit=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 400 - invalid p data type', async () => {
+        const response = await request(app).get('/api/reviews?p=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 400 - negative page number', async () => {
+        const response = await request(app).get('/api/reviews?p=-1').expect(400);
+        expect(response.body.message).toBe('page must be 1 or more');
+    })
+    test('status 400 - negative limit number', async () => {
+        const response = await request(app).get('/api/reviews?limit=-1').expect(400);
+        expect(response.body.message).toBe('LIMIT must not be negative');
+    })
+    test('status 400 - 0 page number', async () => {
+        const response = await request(app).get('/api/reviews?p=0').expect(400);
+        expect(response.body.message).toBe('page must be 1 or more');
+    })
+    
+  
 
+})
+
+describe.skip('POST /api/reviews', () => {
+    test('status 200 - Creates a new review', async () => {
+        const response = await request(app).post('/api/reviews').send(postSend).expect(201);
+        expect(response.body.reviews).toEqual({
+            
+        })
+    })
 })

@@ -37,8 +37,14 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit=10, 
     qryStr += `LIMIT $${dollarValL} OFFSET $${dollarValP}`
 
     const qryResponse = await db.query(qryStr, queryValues);
+    
 
-    return qryResponse.rows;
+    //get number of results
+    const qryResponseAll = await db.query(`SELECT * FROM reviews`);
+
+    return { reviews : qryResponse.rows, total_count : qryResponseAll.rows.length }
+
+
 }
 
 

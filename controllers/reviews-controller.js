@@ -2,8 +2,9 @@ const { insertCommentByReviewId, selectReviewById, updateReviewsById, selectRevi
 
 const getReviews = (req, res, next) => {
     const { sort_by, order, category, limit, p } = req.query;
-    selectReviews(sort_by, order, category, limit, p).then(reviews => {
-        res.status(200).send({reviews});
+    selectReviews(sort_by, order, category, limit, p).then(({reviews, total_count}) => {
+        
+        res.status(200).send({reviews,total_count});
     }).catch(err => {
         next(err);
     })
