@@ -176,7 +176,7 @@ describe('GET api/reviews', () => {
     test('status 200 - returns an array of review objects', async () => {
         const response = await request(app).get('/api/reviews').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(13);
+        expect(response.body.reviews).toHaveLength(10);
         response.body.reviews.forEach(review => {
             expect(review).toEqual(expect.objectContaining({
                 owner : expect.any(String),
@@ -231,7 +231,7 @@ describe('GET api/reviews', () => {
     test('status 200 - ?order=asc changes order direction', async () => {
         const response = await request(app).get('/api/reviews?order=asc').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(13);
+        expect(response.body.reviews).toHaveLength(10);
         response.body.reviews.forEach(review => {
             expect(review).toEqual(expect.objectContaining({
                 owner : expect.any(String),
@@ -289,13 +289,13 @@ describe('GET api/reviews', () => {
     test('status 200 - ?category=CATTY allows sorting by specified category', async () => {
         const response = await request(app).get('/api/reviews?category=social deduction').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(11);        
+        expect(response.body.reviews).toHaveLength(10);        
     })
 
     test('status 200 - All 3 querys work together', async () => {
         const response = await request(app).get('/api/reviews?category=social deduction&sort_by=comment_count&order=asc').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(11); 
+        expect(response.body.reviews).toHaveLength(10); 
         expect(response.body.reviews).toBeSortedBy('comment_count');
     })
 
@@ -306,7 +306,7 @@ describe('GET api/reviews', () => {
     test('status 200 - Invalid order query defaults to default (desc)' , async () => {
         const response = await request(app).get('/api/reviews?order=NOPE').expect(200);
         expect(response.body.reviews).toBeSortedBy('created_at', { descending : true });
-        expect(response.body.reviews).toHaveLength(13);
+        expect(response.body.reviews).toHaveLength(10);
     })
     test('status 404 - Category query is not in database', async () => {
         const response = await request(app).get('/api/reviews?category=NOPE').expect(404);
@@ -428,3 +428,100 @@ describe('GET /api/users', () => {
     })
 })
 
+describe('GET /api/users/:username', () => {
+    test('status 200 - responds with a user object', async () => {
+        const response = await request(app).get('/api/users/mallionaire').expect(200);
+        expect(response.body.users).toBeInstanceOf(Object);
+        expect(response.body.users).toEqual({
+              username : 'mallionaire',
+              avatar_url : 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+              name : 'haz'
+         })
+        
+    })
+
+    test('status 404 - Username provided that doesnt exist', async () => {
+        const response = await request(app).get('/api/users/Scott').expect(404);
+        expect(response.body.message).toBe('Scott not found');
+    })
+
+})
+
+describe('PATCH /api/comments/:comment_id', () => {
+    test('status 200 - responds with updated comment', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 5 }).expect(200);
+        expect(response.body.comments).toBeInstanceOf(Object);
+        expect(response.body.comments).toEqual({
+            comment_id : 1,
+            author : 'bainesface',
+            review_id : 2,
+            votes : 21,
+            created_at : '2017-11-22T12:43:33.389Z',
+            body : 'I loved this game too!'
+        })
+    })
+    test('status 200 - negative votes dont go below 0', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ inc_votes: -50 }).expect(200);
+        expect(response.body.comments).toBeInstanceOf(Object);
+        expect(response.body.comments).toEqual({
+            comment_id : 1,
+            author : 'bainesface',
+            review_id : 2,
+            votes : 0,
+            created_at : '2017-11-22T12:43:33.389Z',
+            body : 'I loved this game too!'
+        })
+    })
+
+    test('status 400 - Invalid coment_id data type', async () => {
+        const response = await request(app).patch('/api/comments/NOPE').send({ inc_votes : 10}).expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 404 - Valid but non-existent commen_id', async () => {
+        const response = await request(app).patch('/api/comments/9999').send({ inc_votes : 10}).expect(404);
+        expect(response.body.message).toBe('9999 not found');
+    })
+    test('status 400 - Missing inc_votes property', async () => {
+        const response = await request(app).patch('/api/comments/1').send({}).expect(400);
+        expect(response.body.message).toBe('inc_votes property required');
+    })
+    test('status 400 - Additional properties sent', async () => {
+        const response = await request(app).patch('/api/comments/1').send({inc_votes : 10, something : 'else' }).expect(400);
+        expect(response.body.message).toBe('Extra properties provided');
+    })
+    test('status 400 - inc_votes provided with invalid data type', async () => {
+        const response = await request(app).patch('/api/comments/1').send({inc_votes : 'nope'}).expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+
+})
+
+describe('/api/reviews Pagination', () => {
+    test('status 200 - reviews results allows limit query', async () => {
+        const response = await request(app).get('/api/reviews?limit=11').expect(200);
+        expect(response.body.reviews).toBeInstanceOf(Array);
+        expect(response.body.reviews).toHaveLength(11);
+        response.body.reviews.forEach(review => {
+            expect(review).toEqual(expect.objectContaining({
+                owner : expect.any(String),
+                title : expect.any(String),
+                review_id : expect.any(Number),
+                category : expect.any(String),
+                review_img_url : expect.any(String),
+                created_at : expect.any(String),
+                votes : expect.any(Number),
+                comment_count : expect.any(String)
+            }))            
+        })
+    })
+
+    test.skip('status 200 - reviews results allows "p" page query', async () => {
+        const response = await request(app).get('/api/reviews?p=2').expect(200);
+        expect(response.body.reviews).toHaveLength(3);
+        expect(response.body.reviews[0].review_id).toBe(11);        
+    })
+    //page without limit
+    //limit invalid data type
+    //limit negative number
+
+})

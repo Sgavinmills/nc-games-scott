@@ -51,7 +51,7 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   const catTableCreation = ['categories', ['slug','description'], formattedCategoryData];
 
   const formattedUserData = formatData(userData);
-  const userTableCreation = ['users', ['username','avatar_url','name'], formattedUserData];
+  const userTableCreation = ['users', ['username','name','avatar_url'], formattedUserData];
 
   const formattedReviewData = formatData(reviewData);
   const reviewTableCreation = ['reviews', ['title', 'designer', 'owner', 'review_img_url', 'review_body', 'category', 'created_at', 'votes'], formattedReviewData]
@@ -67,7 +67,6 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   const insertedCommentData = await insertData([commentTableCreation])
   //console.log(`Inserted data into ${insertedCommentData.length} tables`);
 
-  console.log('\n-----Seeding finished-----')
 };
 
 

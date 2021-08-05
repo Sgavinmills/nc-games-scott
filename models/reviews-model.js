@@ -2,7 +2,7 @@ const db = require('../db/connection.js');
 const { checkExists } = require('../utils.js');
 
 
-const selectReviews = async (sort_by = 'created_at', order, category) => {
+const selectReviews = async (sort_by = 'created_at', order, category, limit=10) => {
     const validSortBys = ['owner','title','review_id','category','comment_count','votes','created_at'];
 
     if(order !== 'asc' && order !== 'desc') {
@@ -16,17 +16,24 @@ const selectReviews = async (sort_by = 'created_at', order, category) => {
     const queryValues =[];
     if(category) {
         await checkExists('categories','slug', category);
-        qryStr += `WHERE category = $1 `;
         queryValues.push(category);
+        let dollarVal = queryValues.length;
+        qryStr += `WHERE category = $${dollarVal} `;
+        
     }
     if(!validSortBys.includes(sort_by)) {
         return Promise.reject({ status: 400, msg: 'Invalid sort query' })
     }
 
     qryStr += `GROUP BY reviews.review_id
-               ORDER BY ${sort_by} ${direction}`;
+               ORDER BY ${sort_by} ${direction} `;
 
+    
+    queryValues.push(limit);
+    let dollarValL = queryValues.length;
+    qryStr += `LIMIT $${dollarValL} `
 
+    
     const qryResponse = await db.query(qryStr, queryValues);
     return qryResponse.rows;
 }
