@@ -12,7 +12,7 @@ describe('GET /api', () => {
         const response = await request(app).get('/api').expect(200);
         //console.log(JSON.parse(response.body));
         //expect(response.body).toEqual({ message: 'All OK - now try a proper route' });
-        expect(response.body).toBeInstanceOf(Buffer)
+        expect(response.body).toBeInstanceOf(Object)
     })
 })
 
