@@ -13,7 +13,7 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
     } else if(err.code === '42703') { //Column does not exist
         res.status(400).send( { message : 'Invalid query parameter' } );
     } else if(err.code === '23503') { //ids are valid but contradict foreign key requirement
-        res.status(404).send( { message : `An important value doesn't exist`})
+        res.status(404).send( { message : `One of your values contradicts a foreign key constraint` })
     } else if(err.code === '22001') { //value too long for type char(2000)
         res.status(400).send( { message : 'Value too long'})
     }
