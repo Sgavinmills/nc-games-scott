@@ -67,7 +67,7 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   const insertedCommentData = await insertData([commentTableCreation])
   //console.log(`Inserted data into ${insertedCommentData.length} tables`);
 
-  //console.log('\n-----Seeding finished-----')
+  console.log('\n-----Seeding finished-----')
 };
 
 
