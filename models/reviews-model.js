@@ -41,7 +41,6 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit=10, 
 
     //get number of results
     const qryResponseAll = await db.query(`SELECT * FROM reviews`);
-
     return { reviews : qryResponse.rows, total_count : qryResponseAll.rows.length }
 
 
@@ -80,15 +79,23 @@ const updateReviewsById = async (review_id, inc_votes) => {
     return qryResponse.rows[0];
 }
 
-const selectCommentsByReviewId = async (review_id) => {
-    
+const selectCommentsByReviewId = async (review_id, limit=10, p=1) => {
+    const offSet = (p-1) * limit;
     const qryResponse = await db.query(`SELECT comment_id, votes, created_at, author, body
                                      FROM comments
-                                     WHERE review_id = $1`, [review_id])
+                                     WHERE review_id = $1
+                                     LIMIT $2 OFFSET $3`, [review_id, limit, offSet])
     if(qryResponse.rows.length === 0) {
         await checkExists('reviews','review_id', review_id)
     }
-    return qryResponse.rows;
+
+    // const qryResponseAll = await db.query(`SELECT * FROM reviews`);
+    // return { reviews : qryResponse.rows, total_count : qryResponseAll.rows.length }
+    const qryResponseAll= await db.query(`SELECT comment_id, votes, created_at, author, body
+    FROM comments
+    WHERE review_id = $1`,[review_id]);
+    return { comments : qryResponse.rows, total_count : qryResponseAll.rows.length }
+    //return qryResponse.rows;
 }
 
 const insertCommentByReviewId = async (review_id, reqBody) => {

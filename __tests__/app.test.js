@@ -545,15 +545,43 @@ describe('GET /api/reviews Pagination', () => {
         expect(response.body.message).toBe('page must be 1 or more');
     })
     
-  
-
 })
 
-describe.skip('POST /api/reviews', () => {
-    test('status 200 - Creates a new review', async () => {
-        const response = await request(app).post('/api/reviews').send(postSend).expect(201);
-        expect(response.body.reviews).toEqual({
-            
-        })
+describe('GET /api/reviews/:review_id/comments Pagination', () => {
+    test('status 200 - allows limit query', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?limit=2').expect(200);
+        expect(response.body.comments).toHaveLength(2);
+        expect(response.body.comments).toEqual([{
+            comment_id: 1,
+            votes: 16,
+            created_at: '2017-11-22T12:43:33.389Z',
+            author: 'bainesface',
+            body: 'I loved this game too!'
+          },
+          {
+            comment_id: 4,
+            votes: 16,
+            created_at: '2017-11-22T12:36:03.389Z',
+            author: 'bainesface',
+            body: 'EPIC board game!'
+          }]);
+    })
+    test('status 200 - adds a total comment count to response', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?limit=2').expect(200);
+        expect(response.body.total_count).toBe(3);
     })
 })
+
+//need to fix first pagination - counts all results rather than just filtered ones
+//then add tests for the second
+//then fix up the messy model functions 
+
+// describe.skip('POST /api/reviews', () => {
+//     test('status 200 - Creates a new review', async () => {
+//         const response = await request(app).post('/api/reviews').send(postSend).expect(201);
+//         expect(response.body.reviews).toEqual({
+            
+//         })
+//     })
+// }
+//

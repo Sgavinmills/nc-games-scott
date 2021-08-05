@@ -31,8 +31,9 @@ const patchReviewsById = (req, res, next) => {
 
 const getCommentsByReviewId = (req, res, next) => {
     const { review_id } = req.params;
-    selectCommentsByReviewId(review_id).then(comments => {
-        res.status(200).send({comments});
+    const { limit, p } = req.query;
+    selectCommentsByReviewId(review_id, limit, p).then(({ comments, total_count }) => {
+        res.status(200).send({comments, total_count});
     }).catch(err => {
         next(err);
     })
@@ -40,7 +41,6 @@ const getCommentsByReviewId = (req, res, next) => {
 
 const postCommentByReviewId = (req, res, next) => {
     const { review_id } = req.params;
-    //const { username, body } = req.body;
     insertCommentByReviewId(review_id, req.body).then(comments => {
         res.status(201).send({comments});
     }).catch(err => {
