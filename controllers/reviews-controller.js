@@ -1,8 +1,8 @@
 const { insertCommentByReviewId, selectReviewById, updateReviewsById, selectReviews, selectCommentsByReviewId } = require('../models/reviews-model.js')
 
 const getReviews = (req, res, next) => {
-    const { sort_by, order, category, limit } = req.query;
-    selectReviews(sort_by, order, category, limit).then(reviews => {
+    const { sort_by, order, category, limit, p } = req.query;
+    selectReviews(sort_by, order, category, limit, p).then(reviews => {
         res.status(200).send({reviews});
     }).catch(err => {
         next(err);

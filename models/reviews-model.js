@@ -2,7 +2,7 @@ const db = require('../db/connection.js');
 const { checkExists } = require('../utils.js');
 
 
-const selectReviews = async (sort_by = 'created_at', order, category, limit=10) => {
+const selectReviews = async (sort_by = 'created_at', order, category, limit=10, p=1) => {
     const validSortBys = ['owner','title','review_id','category','comment_count','votes','created_at'];
 
     if(order !== 'asc' && order !== 'desc') {
@@ -31,10 +31,13 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit=10) 
     
     queryValues.push(limit);
     let dollarValL = queryValues.length;
-    qryStr += `LIMIT $${dollarValL} `
+    const offSet = (p-1) * limit;
+    queryValues.push(offSet);
+    let dollarValP = queryValues.length;
+    qryStr += `LIMIT $${dollarValL} OFFSET $${dollarValP}`
 
-    
     const qryResponse = await db.query(qryStr, queryValues);
+
     return qryResponse.rows;
 }
 

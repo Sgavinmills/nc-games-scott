@@ -514,9 +514,9 @@ describe('/api/reviews Pagination', () => {
             }))            
         })
     })
-
-    test.skip('status 200 - reviews results allows "p" page query', async () => {
-        const response = await request(app).get('/api/reviews?p=2').expect(200);
+    //no need to test for defaults as all the previous tests still pass (after changing all the array lenghts to 10)
+    test('status 200 - reviews results allows "p" page query', async () => {
+        const response = await request(app).get('/api/reviews?p=2&sort_by=review_id&order=asc').expect(200);
         expect(response.body.reviews).toHaveLength(3);
         expect(response.body.reviews[0].review_id).toBe(11);        
     })
