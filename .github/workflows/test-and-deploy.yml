@@ -10,7 +10,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps: 
-      - name: Checkout and Clone Repo
+      - name: Checkout & Clone Repo
         uses: actions/checkout@v2
 
       - name: Use Node.js
