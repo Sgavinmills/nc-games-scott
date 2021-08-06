@@ -9,4 +9,20 @@ const checkExists = async (table, column, value) => {
     }
 }
 
-module.exports = { checkExists }
+const checkMissingProperty = async (requiredProperties, providedProperties) => {
+    for(let i = 0; i < requiredProperties.length; i++) {
+        if(!providedProperties.includes(requiredProperties[i])) {
+            return Promise.reject( { status: 400, msg: `${requiredProperties[i]} property required`})
+        }
+    }
+}
+
+const checkExtraProperties = async (allowedProperties, providedProperties) => {
+    for(let i = 0; i < providedProperties.length; i++) {
+        if(!allowedProperties.includes(providedProperties[i])) {
+          return Promise.reject( { status: 400, msg: `Too many properties provided` })
+        }
+    }
+}
+
+module.exports = { checkExists, checkMissingProperty, checkExtraProperties}

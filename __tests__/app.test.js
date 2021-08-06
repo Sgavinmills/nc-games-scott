@@ -180,53 +180,53 @@ describe('GET api/reviews', () => {
         expect(response.body.reviews).toHaveLength(10);
         response.body.reviews.forEach(review => {
             expect(review).toEqual(expect.objectContaining({
-                owner : expect.any(String),
-                title : expect.any(String),
-                review_id : expect.any(Number),
-                category : expect.any(String),
-                review_img_url : expect.any(String),
-                created_at : expect.any(String),
-                votes : expect.any(Number),
-                comment_count : expect.any(String)
+                owner: expect.any(String),
+                title: expect.any(String),
+                review_id: expect.any(Number),
+                category: expect.any(String),
+                review_img_url: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                comment_count: expect.any(String)
             }))
-            if(review.review_id === 1)
+            if (review.review_id === 1)
                 expect(review.comment_count).toBe('0');
-            if(review.review_id === 3) 
+            if (review.review_id === 3)
                 expect(review.comment_count).toBe('3');
-            
+
         })
     })
     test('status 200 - orders results by date by default', async () => {
         const response = await request(app).get('/api/reviews').expect(200);
-        expect(response.body.reviews).toBeSortedBy('created_at', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('created_at', { descending: true });
     })
     test('status 200 - ?sort_by=owner', async () => {
         const response = await request(app).get('/api/reviews?sort_by=owner').expect(200);
-        expect(response.body.reviews).toBeSortedBy('owner', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('owner', { descending: true });
     })
     test('status 200 - ?sort_by=title', async () => {
         const response = await request(app).get('/api/reviews?sort_by=title').expect(200);
-        expect(response.body.reviews).toBeSortedBy('title', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('title', { descending: true });
     })
     test('status 200 - ?sort_by=review_id', async () => {
         const response = await request(app).get('/api/reviews?sort_by=review_id').expect(200);
-        expect(response.body.reviews).toBeSortedBy('review_id', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('review_id', { descending: true });
     })
     test('status 200 - ?sort_by=category', async () => {
         const response = await request(app).get('/api/reviews?sort_by=category').expect(200);
-        expect(response.body.reviews).toBeSortedBy('category', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('category', { descending: true });
     })
     test('status 200 - ?sort_by=comment_count', async () => {
         const response = await request(app).get('/api/reviews?sort_by=comment_count').expect(200);
-        expect(response.body.reviews).toBeSortedBy('comment_count', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('comment_count', { descending: true });
     })
     test('status 200 - ?sort_by=votes', async () => {
         const response = await request(app).get('/api/reviews?sort_by=votes').expect(200);
-        expect(response.body.reviews).toBeSortedBy('votes', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('votes', { descending: true });
     })
     test('status 200 - ?sort_by=created_at', async () => {
         const response = await request(app).get('/api/reviews?sort_by=created_at').expect(200);
-        expect(response.body.reviews).toBeSortedBy('created_at', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('created_at', { descending: true });
     })
 
     test('status 200 - ?order=asc changes order direction', async () => {
@@ -235,18 +235,18 @@ describe('GET api/reviews', () => {
         expect(response.body.reviews).toHaveLength(10);
         response.body.reviews.forEach(review => {
             expect(review).toEqual(expect.objectContaining({
-                owner : expect.any(String),
-                title : expect.any(String),
-                review_id : expect.any(Number),
-                category : expect.any(String),
-                review_img_url : expect.any(String),
-                created_at : expect.any(String),
-                votes : expect.any(Number),
-                comment_count : expect.any(String)
+                owner: expect.any(String),
+                title: expect.any(String),
+                review_id: expect.any(Number),
+                category: expect.any(String),
+                review_img_url: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                comment_count: expect.any(String)
             }))
-            if(review.review_id === 1)
+            if (review.review_id === 1)
                 expect(review.comment_count).toBe('0');
-            if(review.review_id === 3) 
+            if (review.review_id === 3)
                 expect(review.comment_count).toBe('3');
         })
         expect(response.body.reviews).toBeSortedBy('created_at');
@@ -266,7 +266,7 @@ describe('GET api/reviews', () => {
     })
     test('status 200 - ?sort_by=comment_count?order=desc', async () => {
         const response = await request(app).get('/api/reviews?sort_by=comment_count&order=desc').expect(200);
-        expect(response.body.reviews).toBeSortedBy('comment_count', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('comment_count', { descending: true });
     })
 
     test('status 200 - ?category=CATTY allows sorting by specified category', async () => {
@@ -282,21 +282,21 @@ describe('GET api/reviews', () => {
             category: 'dexterity',
             created_at: '2021-01-18T10:01:41.251Z',
             votes: 5,
-            comment_count : '3'
+            comment_count: '3'
         }])
-            
-        
+
+
     })
     test('status 200 - ?category=CATTY allows sorting by specified category', async () => {
         const response = await request(app).get('/api/reviews?category=social deduction').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(10);        
+        expect(response.body.reviews).toHaveLength(10);
     })
 
     test('status 200 - All 3 querys work together', async () => {
         const response = await request(app).get('/api/reviews?category=social deduction&sort_by=comment_count&order=asc').expect(200);
         expect(response.body.reviews).toBeInstanceOf(Array);
-        expect(response.body.reviews).toHaveLength(10); 
+        expect(response.body.reviews).toHaveLength(10);
         expect(response.body.reviews).toBeSortedBy('comment_count');
     })
 
@@ -304,9 +304,9 @@ describe('GET api/reviews', () => {
         const response = await request(app).get('/api/reviews?sort_by=NOPE').expect(400);
         expect(response.body.message).toBe('Invalid sort query')
     })
-    test('status 200 - Invalid order query defaults to default (desc)' , async () => {
+    test('status 200 - Invalid order query defaults to default (desc)', async () => {
         const response = await request(app).get('/api/reviews?order=NOPE').expect(200);
-        expect(response.body.reviews).toBeSortedBy('created_at', { descending : true });
+        expect(response.body.reviews).toBeSortedBy('created_at', { descending: true });
         expect(response.body.reviews).toHaveLength(10);
     })
     test('status 404 - Category query is not in database', async () => {
@@ -319,7 +319,7 @@ describe('GET api/reviews', () => {
         expect(response.body.reviews).toHaveLength(0);
 
     })
-   
+
 
 })
 
@@ -330,11 +330,11 @@ describe('GET /api/reviews/:review_id/comments', () => {
         expect(response.body.comments).toHaveLength(3);
         response.body.comments.forEach(comment => {
             expect(comment).toEqual(expect.objectContaining({
-                comment_id : expect.any(Number),
-                votes : expect.any(Number),
-                created_at : expect.any(String),
-                author : expect.any(String),
-                body : expect.any(String)
+                comment_id: expect.any(Number),
+                votes: expect.any(Number),
+                created_at: expect.any(String),
+                author: expect.any(String),
+                body: expect.any(String)
             }))
         })
     })
@@ -352,58 +352,62 @@ describe('GET /api/reviews/:review_id/comments', () => {
         expect(response.body.comments).toBeInstanceOf(Array);
         expect(response.body.comments).toHaveLength(0);
     })
-    
+
 })
 
 describe('POST /api/reviews/:review_id/comments', () => {
     test('status 201 - creates a new comment on review_id ', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({username : 'mallionaire', body : 'This review is a waste of time'}).expect(201);
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: 'mallionaire', body: 'This review is a waste of time' }).expect(201);
         expect(response.body.comments).toBeInstanceOf(Object);
         expect(response.body.comments).toEqual({
-            author : 'mallionaire',
-            body : 'This review is a waste of time',
-            comment_id : 7,
-            votes : 0,
-            created_at : expect.any(String),
-            review_id : 1
+            author: 'mallionaire',
+            body: 'This review is a waste of time',
+            comment_id: 7,
+            votes: 0,
+            created_at: expect.any(String),
+            review_id: 1
         })
     })
 
     test('status 400 - Invalid review ID', async () => {
-        const response = await request(app).post('/api/reviews/NOPE/comments').send({username : 'mallionaire', body : 'This review is a waste of time'}).expect(400);
+        const response = await request(app).post('/api/reviews/NOPE/comments').send({ username: 'mallionaire', body: 'This review is a waste of time' }).expect(400);
         expect(response.body.message).toBe('Invalid data type')
     })
     test('status 404 - review_id valid but doesnt exist', async () => {
-        const response = await request(app).post('/api/reviews/9999/comments').send({username : 'mallionaire', body : 'This review is a waste of time'}).expect(404);
-        expect(response.body.message).toBe(`One of your values contradicts a foreign key constraint`)
+        const response = await request(app).post('/api/reviews/9999/comments').send({ username: 'mallionaire', body: 'This review is a waste of time' }).expect(404);
+        expect(response.body.message).toBe(`One of your values is required to already exist in the database but could not be found`)
     })
     test('status 400 - Extra properties provided', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({something : 'else', username : 'mallionaire', body : 'This review is a waste of time'}).expect(400);
+        const response = await request(app).post('/api/reviews/1/comments').send({ something: 'else', username: 'mallionaire', body: 'This review is a waste of time' }).expect(400);
         expect(response.body.message).toBe('Too many properties provided')
     })
     test('status 400 - Missing required property username', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({body : 'This review is a waste of time'}).expect(400);
+        const response = await request(app).post('/api/reviews/1/comments').send({ body: 'This review is a waste of time' }).expect(400);
         expect(response.body.message).toBe('username property required')
     })
     test('status 400 - Missing required property body', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({username : 'mallionaire'}).expect(400);
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: 'mallionaire' }).expect(400);
         expect(response.body.message).toBe('body property required')
     })
     test('status 404 - Username doesnt exist', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({username : 'King', body : 'This review is a waste of time'}).expect(404);
-        expect(response.body.message).toBe(`One of your values contradicts a foreign key constraint`)
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: 'King', body: 'This review is a waste of time' }).expect(404);
+        expect(response.body.message).toBe(`One of your values is required to already exist in the database but could not be found`)
     })
     test('status 400 - Body is too long', async () => {
-        const response = await request(app).post('/api/reviews/1/comments').send({username : 'mallionaire', body : 'x'.repeat(2001) }).expect(400);
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: 'mallionaire', body: 'x'.repeat(2001) }).expect(400);
         expect(response.body.message).toBe('Value too long')
     })
-  
+
 })
 
-//how to test this one was successful besides status code?
+
 describe('DELETE /api/comments/:comment_id', () => {
     test('status 204 - deletes comment by id', async () => {
+        const dbQryBefore = await db.query('SELECT * FROM comments WHERE comment_id = 1');
+        expect(dbQryBefore.rows).toHaveLength(1);
         const response = await request(app).delete('/api/comments/1').expect(204);
+        const dbQryAfter = await db.query('SELECT * FROM comments WHERE comment_id = 1');
+        expect(dbQryAfter.rows).toHaveLength(0);
     })
     test('status 400 - Invalid comment_id', async () => {
         const response = await request(app).delete('/api/comments/NOPE').expect(400);
@@ -413,7 +417,7 @@ describe('DELETE /api/comments/:comment_id', () => {
         const response = await request(app).delete('/api/comments/9999').expect(404);
         expect(response.body.message).toBe('9999 does not exist')
     })
-   
+
 })
 
 describe('GET /api/users', () => {
@@ -421,10 +425,10 @@ describe('GET /api/users', () => {
         const response = await request(app).get('/api/users').expect(200);
         expect(response.body.users).toHaveLength(4);
         expect(response.body.users).toEqual([
-            { username : 'mallionaire' },
-            { username : 'philippaclaire9' },
-            { username : 'bainesface' },
-            { username : 'dav3rid' }
+            { username: 'mallionaire' },
+            { username: 'philippaclaire9' },
+            { username: 'bainesface' },
+            { username: 'dav3rid' }
         ])
     })
 })
@@ -434,11 +438,11 @@ describe('GET /api/users/:username', () => {
         const response = await request(app).get('/api/users/mallionaire').expect(200);
         expect(response.body.users).toBeInstanceOf(Object);
         expect(response.body.users).toEqual({
-              username : 'mallionaire',
-              avatar_url : 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
-              name : 'haz'
-         })
-        
+            username: 'mallionaire',
+            avatar_url: 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+            name: 'haz'
+        })
+
     })
 
     test('status 404 - Username provided that doesnt exist', async () => {
@@ -453,33 +457,33 @@ describe('PATCH /api/comments/:comment_id', () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: 5 }).expect(200);
         expect(response.body.comments).toBeInstanceOf(Object);
         expect(response.body.comments).toEqual({
-            comment_id : 1,
-            author : 'bainesface',
-            review_id : 2,
-            votes : 21,
-            created_at : '2017-11-22T12:43:33.389Z',
-            body : 'I loved this game too!'
+            comment_id: 1,
+            author: 'bainesface',
+            review_id: 2,
+            votes: 21,
+            created_at: '2017-11-22T12:43:33.389Z',
+            body: 'I loved this game too!'
         })
     })
     test('status 200 - negative votes dont go below 0', async () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: -50 }).expect(200);
         expect(response.body.comments).toBeInstanceOf(Object);
         expect(response.body.comments).toEqual({
-            comment_id : 1,
-            author : 'bainesface',
-            review_id : 2,
-            votes : 0,
-            created_at : '2017-11-22T12:43:33.389Z',
-            body : 'I loved this game too!'
+            comment_id: 1,
+            author: 'bainesface',
+            review_id: 2,
+            votes: 0,
+            created_at: '2017-11-22T12:43:33.389Z',
+            body: 'I loved this game too!'
         })
     })
 
     test('status 400 - Invalid coment_id data type', async () => {
-        const response = await request(app).patch('/api/comments/NOPE').send({ inc_votes : 10}).expect(400);
+        const response = await request(app).patch('/api/comments/NOPE').send({ inc_votes: 10 }).expect(400);
         expect(response.body.message).toBe('Invalid data type');
     })
     test('status 404 - Valid but non-existent commen_id', async () => {
-        const response = await request(app).patch('/api/comments/9999').send({ inc_votes : 10}).expect(404);
+        const response = await request(app).patch('/api/comments/9999').send({ inc_votes: 10 }).expect(404);
         expect(response.body.message).toBe('9999 not found');
     })
     test('status 400 - Missing inc_votes property', async () => {
@@ -487,11 +491,11 @@ describe('PATCH /api/comments/:comment_id', () => {
         expect(response.body.message).toBe('inc_votes property required');
     })
     test('status 400 - Additional properties sent', async () => {
-        const response = await request(app).patch('/api/comments/1').send({inc_votes : 10, something : 'else' }).expect(400);
+        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 10, something: 'else' }).expect(400);
         expect(response.body.message).toBe('Extra properties provided');
     })
     test('status 400 - inc_votes provided with invalid data type', async () => {
-        const response = await request(app).patch('/api/comments/1').send({inc_votes : 'nope'}).expect(400);
+        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 'nope' }).expect(400);
         expect(response.body.message).toBe('Invalid data type');
     })
 
@@ -504,15 +508,15 @@ describe('GET /api/reviews Pagination', () => {
         expect(response.body.reviews).toHaveLength(11);
         response.body.reviews.forEach(review => {
             expect(review).toEqual(expect.objectContaining({
-                owner : expect.any(String),
-                title : expect.any(String),
-                review_id : expect.any(Number),
-                category : expect.any(String),
-                review_img_url : expect.any(String),
-                created_at : expect.any(String),
-                votes : expect.any(Number),
-                comment_count : expect.any(String)
-            }))            
+                owner: expect.any(String),
+                title: expect.any(String),
+                review_id: expect.any(Number),
+                category: expect.any(String),
+                review_img_url: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                comment_count: expect.any(String)
+            }))
         })
     })
     test('status 200 - adds a total review count to response', async () => {
@@ -529,7 +533,7 @@ describe('GET /api/reviews Pagination', () => {
     test('status 200 - reviews results allows "p" page query', async () => {
         const response = await request(app).get('/api/reviews?p=2&sort_by=review_id&order=asc').expect(200);
         expect(response.body.reviews).toHaveLength(3);
-        expect(response.body.reviews[0].review_id).toBe(11);        
+        expect(response.body.reviews[0].review_id).toBe(11);
     })
     test('status 400 - invalid limit data type', async () => {
         const response = await request(app).get('/api/reviews?limit=NOPE').expect(400);
@@ -550,9 +554,9 @@ describe('GET /api/reviews Pagination', () => {
     test('status 400 - 0 page number', async () => {
         const response = await request(app).get('/api/reviews?p=0').expect(400);
         expect(response.body.message).toBe('Limit and page must be greater than 0')
-        
+
     })
-    
+
 })
 
 describe('GET /api/reviews/:review_id/comments Pagination', () => {
@@ -565,14 +569,14 @@ describe('GET /api/reviews/:review_id/comments Pagination', () => {
             created_at: '2017-11-22T12:43:33.389Z',
             author: 'bainesface',
             body: 'I loved this game too!'
-          },
-          {
+        },
+        {
             comment_id: 4,
             votes: 16,
             created_at: '2017-11-22T12:36:03.389Z',
             author: 'bainesface',
             body: 'EPIC board game!'
-          }]);
+        }]);
     })
     test('status 200 - adds a total comment count to response', async () => {
         const response = await request(app).get('/api/reviews/2/comments?limit=2').expect(200);
@@ -589,7 +593,7 @@ describe('GET /api/reviews/:review_id/comments Pagination', () => {
             created_at: '2021-01-18T10:24:05.410Z',
             author: 'mallionaire',
             body: 'Now this is a story all about how, board games turned my life upside down'
-        }]);        
+        }]);
     })
     test('status 400 - invalid limit data type', async () => {
         const response = await request(app).get('/api/reviews/2/comments?p=2&limit=NOPE').expect(400);
@@ -613,17 +617,249 @@ describe('GET /api/reviews/:review_id/comments Pagination', () => {
     })
 })
 
+describe('POST /api/reviews', () => {
+    test('status 201 - Creates a new review', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(201);
+        expect(response.body.reviews).toBeInstanceOf(Object);
+        expect(response.body.reviews).toEqual({
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_id: 14,
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0
+        })
+    })
+    test('status 200 - allows an optional review_img_url property to be provided', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(201);
+        expect(response.body.reviews).toEqual({
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_id: 14,
+            votes: 0,
+            created_at: expect.any(String),
+            comment_count: 0,
+            review_img_url : 'www.yep.com'
+        })
+    })
+    test('status 404 - Valid but non-existent username', async () => {
+        const postSend = {
+            owner: 'Scotty',
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
+        
+    })
+    test('status 400 - Title too long', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly'.repeat(100),
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Value too long');
+    })
+    test('status 400 - Review body too long', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'd'.repeat(5001),
+            designer: 'Hasbrooo',
+            category: 'dexterity',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Value too long');
+    })
+    test('status 400 - Designer too long', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'd'.repeat(5001),
+            designer: 'H'.repeat(101),
+            category: 'dexterity',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Value too long');
+    })
+    test('status 404 - One of your values is required to already exist in the database but could not be found', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Reeeevviieww Body',
+            designer: 'Hasbro',
+            category: 'made up category',
+            review_img_url : 'www.yep.com'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
+    })
+    test('status 400 - Missing owner property', async () => {
+        const postSend = {
+            title: 'Monopoly',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('owner property required');
 
-//then Pauls comments
+    })
+    test('status 400 - Missing title property', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            review_body: 'Do not play after drinks on christmas day',
+            designer: 'Hasbrooo',
+            category: 'dexterity'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('title property required');
+
+    })
+    test('status 400 - Missing review_body property', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            designer: 'Hasbrooo',
+            category: 'dexterity'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('review_body property required');
+
+    })
+    test('status 400 - Missing designer property', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Hasbrooo',
+            category: 'dexterity'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('designer property required');
+
+    })
+    test('status 400 - Missing category property', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Hasbrooo',
+            designer : 'Hasbro'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('category property required');
+
+    })
+
+    test('status 400 - Too many properties provided', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Hasbrooo',
+            designer : 'Hasbro',
+            category : 'dexterity',
+            something: 'else'
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Too many properties provided');
+    })
+    
+})
+
+ describe('POST api/categories', () => {
+    test('status 201 - Creates new category', async () => {
+        const response = await request(app).post('/api/categories').send({slug : "Role playing", description : 'Dungeons n dragons etc'}).expect(201);
+        expect(response.body.categories).toEqual({
+            slug : "Role playing", 
+            description : 'Dungeons n dragons etc'
+        })
+    })
+    test('status 400 - Slug value too long', async () => {
+        const response = await request(app).post('/api/categories').send({slug : "R".repeat(201), description : 'Dungeons n dragons etc'}).expect(400);
+        expect(response.body.message).toBe('Value too long');
+        
+    })
+    test('status 400 - Description value too long', async () => {
+        const response = await request(app).post('/api/categories').send({slug : "Roaar", description : 'D'.repeat(501)}).expect(400);
+        expect(response.body.message).toBe('Value too long');
+        
+    })
+    test('status 400 - Slug property missing', async () => {
+        const response = await request(app).post('/api/categories').send({description : 'Dungeons n dragons etc'}).expect(400);
+        expect(response.body.message).toBe('slug property required');
+
+    })
+    test('status 400 - Description property missing', async () => {
+        const response = await request(app).post('/api/categories').send({slug : 'Dungeons n dragons etc'}).expect(400);
+        expect(response.body.message).toBe('description property required');
+
+    })
+    test('status 400 - Too many properties provided', async () => {
+        const response = await request(app).post('/api/categories').send({slug : 'Dungeons n dragons etc', description: 'a description', something : 'else'}).expect(400);
+        expect(response.body.message).toBe('Too many properties provided');
+    })
+
+
+   
+ 
+
+ })   
+
+ describe('DELETE /api/reviews/:review_id', () => {
+    test('status 204 - deletes review by id', async () => {
+        const dbQryBefore = await db.query('SELECT * FROM reviews WHERE review_id = 2');
+        expect(dbQryBefore.rows).toHaveLength(1);
+        const response = await request(app).delete('/api/reviews/2').expect(204);
+        const dbQryAfter = await db.query('SELECT * FROM reviews WHERE review_id = 2');
+        expect(dbQryAfter.rows).toHaveLength(0);
+    })
+    test('status 400 - Invalid review_id', async () => {
+        const response = await request(app).delete('/api/reviews/NOPE').expect(400);
+         expect(response.body.message).toBe('Invalid data type')
+    })
+    test('status 404 - Valid but non-existent review_id', async () => {
+        const response = await request(app).delete('/api/reviews/8888').expect(404);
+        expect(response.body.message).toBe('8888 does not exist')
+    })
+    test('status 204 - corresponding comments also deleted', async () => {
+        const dbQryBefore = await db.query('SELECT * FROM comments WHERE comment_id = 1')
+        expect(dbQryBefore.rows).toHaveLength(1);
+        const response = await request(app).delete('/api/reviews/2').expect(204);
+        const dbQryAfter = await db.query('SELECT * FROM comments WHERE comment_id = 1')
+        expect(dbQryAfter.rows).toHaveLength(0);
+        
+    })
+
+ })
+
 //then fix up the messy model functions 
-
-
-// describe.skip('POST /api/reviews', () => {
-//     test('status 200 - Creates a new review', async () => {
-//         const response = await request(app).post('/api/reviews').send(postSend).expect(201);
-//         expect(response.body.reviews).toEqual({
-            
-//         })
-//     })
-// }
-//
+//add in validation check on image_url on post /api/reviews

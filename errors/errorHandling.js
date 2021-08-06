@@ -13,11 +13,10 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
     } else if(err.code === '42703') { //Column does not exist
         res.status(400).send( { message : 'Invalid query parameter' } );
     } else if(err.code === '23503') { //ids are valid but contradict foreign key requirement
-        res.status(404).send( { message : `One of your values contradicts a foreign key constraint` })
+        res.status(404).send( { message : `One of your values is required to already exist in the database but could not be found` })
     } else if(err.code === '22001') { //value too long for type char(2000)
         res.status(400).send( { message : 'Value too long'})
     } else if(err.code === '2201W') {
-        //res.status(400).send( { message : err.message })
         res.status(400).send( { message: 'Limit and page must be greater than 0' })
     } else if(err.code === '2201X') {
         res.status(400).send( { message : "Limit and page must be greater than 0" })

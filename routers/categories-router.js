@@ -1,7 +1,9 @@
-const { getCategories } = require('../controllers/categories-controller');
+const { getCategories, postCategories } = require('../controllers/categories-controller');
 
 const categoriesRouter = require('express').Router();
 
-categoriesRouter.get('/', getCategories);
+categoriesRouter.route('/')
+  .get(getCategories)
+  .post(postCategories);
 
 module.exports = categoriesRouter;
