@@ -8,7 +8,8 @@ const fs = require('fs/promises');
 
 apiRouter.get('/', async (req, res, next) => {
     const apiMap = await fs.readFile('./endpointlist.json','utf-8');
-    res.status(200).send(apiMap)
+    const parsedApiMap = JSON.parse(apiMap);
+    res.status(200).send({endpoints : parsedApiMap})
     //res.status(200).send({message : 'All OK - now try a proper route'})
 })
 

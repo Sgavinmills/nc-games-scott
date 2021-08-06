@@ -26,7 +26,7 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
     'title VARCHAR(100) COLLATE "C" NOT NULL',
     'review_body TEXT NOT NULL',
     'designer VARCHAR(100)',
-    `review_img_url VARCHAR(200) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg'`,
+    `review_img_url VARCHAR(1000) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg'`,
     `votes INT DEFAULT 0 CHECK (votes >= 0)`,
     `category VARCHAR(200) REFERENCES categories(slug)`,
     `owner VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE`,

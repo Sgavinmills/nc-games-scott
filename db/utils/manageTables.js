@@ -9,7 +9,7 @@ const dropTables = async (tblNames) => {
 
 const createTables = async (tbls) => { //tbls is nested array with each inner array comprising [[tblName,[columns]]]
     for(let i = 0; i < tbls.length; i++) {
-        createTableQueryStr = `CREATE TABLE ${tbls[i][0]} (`;
+        let createTableQueryStr = `CREATE TABLE ${tbls[i][0]} (`;
         tbls[i][1].forEach((column, index) => {
             createTableQueryStr += column;
             if(index !== tbls[i][1].length - 1) 

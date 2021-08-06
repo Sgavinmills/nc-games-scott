@@ -17,9 +17,10 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
     } else if(err.code === '22001') { //value too long for type char(2000)
         res.status(400).send( { message : 'Value too long'})
     } else if(err.code === '2201W') {
-        res.status(400).send( { message : err.message })
+        //res.status(400).send( { message : err.message })
+        res.status(400).send( { message: 'Limit and page must be greater than 0' })
     } else if(err.code === '2201X') {
-        res.status(400).send( { message : "page must be 1 or more" })
+        res.status(400).send( { message : "Limit and page must be greater than 0" })
     }
     else next(err);
 }

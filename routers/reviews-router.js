@@ -5,11 +5,11 @@ const { postCommentByReviewId, getReviewsById, patchReviewsById, getReviews, get
 reviewsRouter.get('/', getReviews);
 
 reviewsRouter.route('/:review_id')
-.get(getReviewsById)
-.patch(patchReviewsById);
+  .get(getReviewsById)
+  .patch(patchReviewsById);
 
 reviewsRouter.route('/:review_id/comments')
-.get(getCommentsByReviewId)
-.post(postCommentByReviewId);
+  .get(getCommentsByReviewId)
+  .post(postCommentByReviewId);
 
 module.exports = reviewsRouter;

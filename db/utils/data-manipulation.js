@@ -11,10 +11,9 @@ const createRefObj = (arr, ref1, ref2) => {
 
 //produces an array of arrays of the property values from an array of objects
 const formatData = (arrOfObjs) => {
-    const copy = [...arrOfObjs];
-    const result = copy.map((object) => {
+    const result = arrOfObjs.map((object) => {
         let newArr = []
-        for (const key in object) {
+        for (const key in object) { //refactor for..in to extract specific key values incase data isn't ordered. 
             newArr.push(object[key])
         }
         return newArr;

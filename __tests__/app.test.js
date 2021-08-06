@@ -3,6 +3,7 @@ const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
 const app = require('../app.js');
+const JSONEndPointsFile = require('../endpointlist.json');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -12,7 +13,7 @@ describe('GET /api', () => {
         const response = await request(app).get('/api').expect(200);
         //console.log(JSON.parse(response.body));
         //expect(response.body).toEqual({ message: 'All OK - now try a proper route' });
-        expect(response.body).toBeInstanceOf(Object)
+        expect(response.body.endpoints).toEqual(JSONEndPointsFile);
     })
 })
 
@@ -518,6 +519,12 @@ describe('GET /api/reviews Pagination', () => {
         const response = await request(app).get('/api/reviews?limit=11').expect(200);
         expect(response.body.total_count).toBe(13);
     })
+    test('status 200 - total review count is only total number of results that fit query', async () => {
+        const response = await request(app).get('/api/reviews?category=social deduction&limit=4').expect(200);
+        expect(response.body.total_count).toBe(11);
+        expect(response.body.reviews).toHaveLength(4);
+
+    })
     //no need to test for defaults as all the previous tests still pass (after changing all the array lenghts to 10)
     test('status 200 - reviews results allows "p" page query', async () => {
         const response = await request(app).get('/api/reviews?p=2&sort_by=review_id&order=asc').expect(200);
@@ -534,15 +541,16 @@ describe('GET /api/reviews Pagination', () => {
     })
     test('status 400 - negative page number', async () => {
         const response = await request(app).get('/api/reviews?p=-1').expect(400);
-        expect(response.body.message).toBe('page must be 1 or more');
+        expect(response.body.message).toBe('Limit and page must be greater than 0');
     })
     test('status 400 - negative limit number', async () => {
         const response = await request(app).get('/api/reviews?limit=-1').expect(400);
-        expect(response.body.message).toBe('LIMIT must not be negative');
+        expect(response.body.message).toBe('Limit and page must be greater than 0');
     })
     test('status 400 - 0 page number', async () => {
         const response = await request(app).get('/api/reviews?p=0').expect(400);
-        expect(response.body.message).toBe('page must be 1 or more');
+        expect(response.body.message).toBe('Limit and page must be greater than 0')
+        
     })
     
 })
@@ -569,12 +577,46 @@ describe('GET /api/reviews/:review_id/comments Pagination', () => {
     test('status 200 - adds a total comment count to response', async () => {
         const response = await request(app).get('/api/reviews/2/comments?limit=2').expect(200);
         expect(response.body.total_count).toBe(3);
+        expect(response.body.comments).toHaveLength(2);
+
+    })
+    test('status 200 - comments results allows "p" page query', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=2&limit=2').expect(200);
+        expect(response.body.comments).toHaveLength(1);
+        expect(response.body.comments).toEqual([{
+            comment_id: 5,
+            votes: 13,
+            created_at: '2021-01-18T10:24:05.410Z',
+            author: 'mallionaire',
+            body: 'Now this is a story all about how, board games turned my life upside down'
+        }]);        
+    })
+    test('status 400 - invalid limit data type', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=2&limit=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 400 - invalid p data type', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=NOPE&limit=2').expect(400);
+        expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 400 - negative page number', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=-1&limit=2').expect(400);
+        expect(response.body.message).toBe('Limit and page must be greater than 0');
+    })
+    test('status 400 - negative limit number', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=2&limit=-2').expect(400);
+        expect(response.body.message).toBe('Limit and page must be greater than 0');
+    })
+    test('status 400 - 0 page number', async () => {
+        const response = await request(app).get('/api/reviews/2/comments?p=0&limit=2').expect(400);
+        expect(response.body.message).toBe('Limit and page must be greater than 0');
     })
 })
 
-//need to fix first pagination - counts all results rather than just filtered ones
-//then add tests for the second
+
+//then Pauls comments
 //then fix up the messy model functions 
+
 
 // describe.skip('POST /api/reviews', () => {
 //     test('status 200 - Creates a new review', async () => {

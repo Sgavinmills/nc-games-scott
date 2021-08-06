@@ -11,7 +11,6 @@ const deleteCommentById = (req, res, next) => {
 
 const patchCommentById = (req, res, next) => {
     const { comment_id } = req.params;
-    const { inc_votes } = req.body
     updateCommentById(comment_id, req.body).then(comments => {
         res.status(200).send({comments});
     }).catch(err => {
