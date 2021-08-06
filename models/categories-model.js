@@ -2,10 +2,8 @@ const db = require('../db/connection.js');
 const { checkMissingProperty, checkExtraProperties } = require('../utils.js');
 
 const selectCategories = async () => {
-    
     const queryResponse = await db.query('SELECT * FROM categories');
     return queryResponse.rows;
-
 }
 
 const insertCategories = async (body) => {
@@ -13,6 +11,7 @@ const insertCategories = async (body) => {
 
     const requiredProperties = ['slug', 'description'];
     const providedProperties = Object.keys(body);
+
     await checkMissingProperty(requiredProperties, providedProperties);
     await checkExtraProperties(requiredProperties, providedProperties);
     const queryResponse = await db.query(`INSERT into categories

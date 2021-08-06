@@ -10,7 +10,6 @@ apiRouter.get('/', async (req, res, next) => {
     const apiMap = await fs.readFile('./endpointlist.json','utf-8');
     const parsedApiMap = JSON.parse(apiMap);
     res.status(200).send({endpoints : parsedApiMap})
-    //res.status(200).send({message : 'All OK - now try a proper route'})
 })
 
 apiRouter.use('/categories', categoriesRouter); 

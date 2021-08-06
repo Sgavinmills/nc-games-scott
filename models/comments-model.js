@@ -1,8 +1,10 @@
 const db = require('../db/connection.js');
+const { checkExtraProperties, checkMissingProperty } = require('../utils.js');
 
 const dropCommentById = async (comment_id) => {
     const response = await db.query(`DELETE FROM comments 
-                    WHERE comment_id = $1 RETURNING *;`,[comment_id]); 
+                                    WHERE comment_id = $1 
+                                    RETURNING *;`,[comment_id]); 
 
     if(response.rows.length === 0) {
         return Promise.reject({ status: 404, msg : `${comment_id} does not exist`})
@@ -12,13 +14,11 @@ const dropCommentById = async (comment_id) => {
 const updateCommentById = async (comment_id, reqBody) => {
     const { inc_votes } = reqBody;
     const otherKeys = Object.keys(reqBody);
-    const extraKeys = otherKeys.some(key => key !== 'inc_votes');
-    if(extraKeys) {
-        return Promise.reject({status: 400, msg : `Extra properties provided`})
-    }
-    if(!inc_votes) {
-        return Promise.reject({status: 400, msg : `inc_votes property required`})
-    }
+  
+
+    await checkExtraProperties(['inc_votes'], otherKeys);
+    await checkMissingProperty(['inc_votes'], otherKeys)
+   
     
     const qryResponse = await db.query(`UPDATE comments SET votes = 
                                         (CASE WHEN (votes + $1) >= 0

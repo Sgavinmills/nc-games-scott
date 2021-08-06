@@ -66,8 +66,11 @@
                           "votes": 3,
                           "created_at": "2021-03-27T19:48:58.110Z",
                           "author": "jessjelly",
-                          "body": "Quis duis mollit ad enim deserunt."
-                        }]
+                          "body": "Quis duis mollit ad enim deserunt.",
+                          "limit": 5,
+                          "p": 1
+                        }],
+                    "total_count" : 10
                 }
             },
             "/api/users" : {
@@ -110,6 +113,40 @@
                         "body": "body of the comment"
                       }
                 }
+            },
+            "/api/reviews" : {
+                "description" : "Allows adding of a new review",
+                "exampleRequestBody" : {
+                    "owner": "mallionaire",
+                    "title": "Monopoly",
+                    "review_body": "Do not play after drinks on christmas day",
+                    "designer": "Hasbrooo",
+                    "category": "dexterity"
+                },
+                "exampleResponse" : {
+                    "reviews" : {
+                        "owner": "mallionaire",
+                        "title": "Monopoly",
+                        "review_body": "Do not play after drinks on christmas day",
+                        "designer": "Hasbrooo",
+                        "category": "dexterity",
+                        "review_id": 14,
+                        "votes": 0,
+                        "created_at": "2021-08-04T21:58:00.296Z",
+                        "comment_count": 0
+                    }
+                }
+            },
+            "/api/categories" : {
+                "description" : "Allows adding of new categories",
+                "exampleRequestBody" : {
+                    "slug" : "Category name",
+                    "description" : "A sick description"
+                },
+                "exampleResponse" : {
+                    "slug" : "Category name",
+                    "description" : "A sick description"
+                }
             }
         },
         "PATCH": {
@@ -150,6 +187,9 @@
         "DELETE": {
             "/api/comments/:comment_id" : {
                 "description" : "Allows deleting of a comment"
+            },
+            "/api/reviews/:review_id" : {
+                "description" : "Allows deleting of a review"
             }
         }
     }

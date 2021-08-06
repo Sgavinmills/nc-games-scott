@@ -145,7 +145,7 @@ describe('PATCH api/reviews/:review_id', () => {
     })
     test('status 400 - No inc_votes value on request body', async () => {
         const response = await request(app).patch('/api/reviews/1').send({ nothere: 'noo' }).expect(400);
-        expect(response.body.message).toBe('Missing data');
+        expect(response.body.message).toBe('inc_votes property required');
     })
     test('status 200 - Additional propertys on request body', async () => {
         const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 2, more: 'no' }).expect(200);
@@ -302,7 +302,7 @@ describe('GET api/reviews', () => {
 
     test('status 400 - Invalid sort_by query - column does not exist or is not allowed', async () => {
         const response = await request(app).get('/api/reviews?sort_by=NOPE').expect(400);
-        expect(response.body.message).toBe('Invalid sort query')
+        expect(response.body.message).toBe('Invalid query: NOPE')
     })
     test('status 200 - Invalid order query defaults to default (desc)', async () => {
         const response = await request(app).get('/api/reviews?order=NOPE').expect(200);
@@ -492,7 +492,7 @@ describe('PATCH /api/comments/:comment_id', () => {
     })
     test('status 400 - Additional properties sent', async () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: 10, something: 'else' }).expect(400);
-        expect(response.body.message).toBe('Extra properties provided');
+        expect(response.body.message).toBe('Too many properties provided');
     })
     test('status 400 - inc_votes provided with invalid data type', async () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: 'nope' }).expect(400);
@@ -861,5 +861,3 @@ describe('POST /api/reviews', () => {
 
  })
 
-//then fix up the messy model functions 
-//add in validation check on image_url on post /api/reviews

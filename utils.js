@@ -25,4 +25,10 @@ const checkExtraProperties = async (allowedProperties, providedProperties) => {
     }
 }
 
-module.exports = { checkExists, checkMissingProperty, checkExtraProperties}
+const isValidQuery = async (query, validQuerys) => {
+    if(!validQuerys.includes(query)) {
+      return Promise.reject({ status: 400, msg: `Invalid query: ${query}` })
+    }
+}
+
+module.exports = { checkExists, checkMissingProperty, checkExtraProperties, isValidQuery}

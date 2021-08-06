@@ -20,9 +20,8 @@ const getReviewsById = (req, res, next) => {
 }
 
 const patchReviewsById = (req, res, next) => {
-    const { inc_votes } = req.body;
     const { review_id } = req.params;
-    updateReviewsById(review_id, inc_votes).then(reviews => {
+    updateReviewsById(review_id, req.body).then(reviews => {
         res.status(200).send({reviews});
     }).catch(err => {
         next(err);
@@ -39,7 +38,7 @@ const getCommentsByReviewId = (req, res, next) => {
     })
 }
 
-const postCommentByReviewId = (req, res, next) => {
+const postCommentsByReviewId = (req, res, next) => {
     const { review_id } = req.params;
     insertCommentByReviewId(review_id, req.body).then(comments => {
         res.status(201).send({comments});
@@ -56,7 +55,7 @@ const postReviews = (req, res, next) => {
     })
 }
 
-const deleteReviewById = (req, res, next) => {
+const deleteReviewsById = (req, res, next) => {
     const { review_id } = req.params;
     dropReviewById(review_id).then(reviews => {
         res.status(204).send();
@@ -65,4 +64,4 @@ const deleteReviewById = (req, res, next) => {
     })
 }
 
-module.exports = { deleteReviewById, postReviews, postCommentByReviewId, getReviewsById, patchReviewsById, getReviews, getCommentsByReviewId };
+module.exports = { deleteReviewsById, postReviews, postCommentsByReviewId, getReviewsById, patchReviewsById, getReviews, getCommentsByReviewId };

@@ -1,12 +1,13 @@
 const db = require('../db/connection.js');
-const { values, some, forEach } = require('../db/data/test-data/categories.js');
-const { checkExists, checkMissingProperty, checkExtraProperties } = require('../utils.js');
+const { checkExists, checkMissingProperty, checkExtraProperties, isValidQuery } = require('../utils.js');
 
 
 const selectReviews = async (sort_by = 'created_at', order, category, limit = 10, p = 1) => {
     const validSortBys = ['owner', 'title', 'review_id', 'category', 'comment_count', 'votes', 'created_at'];
+    await isValidQuery(sort_by, validSortBys);
 
-    if (order !== 'asc' && order !== 'desc') {
+    //if order query is invalid will still return results with default desc
+    if (order !== 'asc' && order !== 'desc') { 
         direction = 'desc';
     } else direction = order;
 
@@ -18,12 +19,7 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
     if (category) {
         await checkExists('categories', 'slug', category);
         queryValues.push(category);
-        let dollarVal = queryValues.length;
-        qryStr += `WHERE category = $${dollarVal} `;
-
-    }
-    if (!validSortBys.includes(sort_by)) {
-        return Promise.reject({ status: 400, msg: 'Invalid sort query' })
+        qryStr += `WHERE category = $${queryValues.length} `;
     }
 
     qryStr += `GROUP BY reviews.review_id
@@ -40,19 +36,17 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
 
     const qryResponse = await db.query(qryStr, queryValues);
 
-
     //get number of results
     queryValues.pop();
     queryValues.pop();
     const qryResponseAll = await db.query(withoutLimitAndOffsetQryStr, queryValues);
-    return { reviews: qryResponse.rows, total_count: qryResponseAll.rows.length }
 
+    return { reviews: qryResponse.rows, total_count: qryResponseAll.rows.length }
 
 }
 
 
 const selectReviewById = async (review_id) => {
-
 
     const qryResponse = await db.query(`SELECT reviews.*, COUNT(comment_id) AS comment_count
                                          FROM REVIEWS 
@@ -67,10 +61,10 @@ const selectReviewById = async (review_id) => {
     return qryResponse.rows[0];
 }
 
-const updateReviewsById = async (review_id, inc_votes) => {
-    if (!inc_votes) {
-        return Promise.reject({ status: 400, msg: 'Missing data' })
-    }
+const updateReviewsById = async (review_id, body) => {
+    const { inc_votes } = body;
+    const providedProps = Object.keys(body);
+    await checkMissingProperty(['inc_votes'], providedProps);
     const qryResponse = await db.query(`UPDATE reviews SET votes = 
                                            (CASE WHEN (votes + $1) >= 0
                                             THEN (votes + $1) ELSE 0 END)
@@ -92,13 +86,12 @@ const selectCommentsByReviewId = async (review_id, limit = 10, p = 1) => {
         await checkExists('reviews', 'review_id', review_id)
     }
 
-    // const qryResponseAll = await db.query(`SELECT * FROM reviews`);
-    // return { reviews : qryResponse.rows, total_count : qryResponseAll.rows.length }
     const qryResponseAll = await db.query(`SELECT comment_id, votes, created_at, author, body
     FROM comments
     WHERE review_id = $1`, [review_id]);
+
     return { comments: qryResponse.rows, total_count: qryResponseAll.rows.length }
-    //return qryResponse.rows;
+    
 }
 
 const insertCommentByReviewId = async (review_id, reqBody) => {
@@ -137,19 +130,17 @@ const insertReviews = async (body) => {
     let qryStrDolValues;
     if (review_img_url) {
         qryStrCols = `(title, review_body, designer, category, owner, review_img_url)`
-        qryStrDolValues = `($1,$2,$3,$4,$5, $6)`
+        qryStrDolValues = `($1,$2,$3,$4,$5,$6)`
         queryValues.push(review_img_url);
     } else {
         qryStrCols = `(title, review_body, designer, category, owner)`
         qryStrDolValues = `($1,$2,$3,$4,$5)`
     }
-    qryStr = `INSERT INTO reviews
-    ${qryStrCols} 
-    VALUES 
-    ${qryStrDolValues}
-    RETURNING *;`;
-
-
+    let qryStr = `INSERT INTO reviews
+                  ${qryStrCols} 
+                  VALUES 
+                  ${qryStrDolValues}
+                  RETURNING *;`;
 
     const qryResponse = await db.query(qryStr, queryValues);
     if (!review_img_url)
