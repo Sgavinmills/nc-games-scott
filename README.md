@@ -23,5 +23,5 @@ After cloning the repository follow these steps for setup:
 - `npm test` will execute the testing suites. There is testing for the utility funtions used in seeding the database as well as the server endpoints. Use `npm test app` to run just the server tests. The server tests will use a test database with test data seeded before every test.
   
 
-
+You will need at least version ___ of node and ___ of PSQL to run this project. 
 
