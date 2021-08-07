@@ -18,7 +18,7 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
   ];
   const usersColumns = [
     'username VARCHAR(200) NOT NULL PRIMARY KEY',
-    'avatar_url VARCHAR(300)',
+    'avatar_url VARCHAR(1000)',
     'name VARCHAR(200) NOT NULL'
   ];
   const reviewsColumns = [
@@ -28,13 +28,13 @@ const seed = async ( { categoryData, commentData, reviewData, userData } ) => {
     'designer VARCHAR(100)',
     `review_img_url VARCHAR(1000) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg'`,
     `votes INT DEFAULT 0 CHECK (votes >= 0)`,
-    `category VARCHAR(200) REFERENCES categories(slug)`,
-    `owner VARCHAR(200) NOT NULL REFERENCES users(username) ON DELETE CASCADE`,
+    `category VARCHAR(200) NOT NULL REFERENCES categories(slug)`,
+    `owner VARCHAR(200) NOT NULL REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE`,
     `created_at TIMESTAMP DEFAULT NOW()`
   ];
   const commentsColumns = [
     `comment_id SERIAL PRIMARY KEY`,
-    `author VARCHAR(200) NOT NULL REFERENCES users(username) ON DELETE CASCADE`,
+    `author VARCHAR(200) NOT NULL REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE`,
     `review_id INT REFERENCES reviews(review_id) ON DELETE CASCADE`,
     `votes INT DEFAULT 0`,
     `created_at TIMESTAMP DEFAULT NOW()`,

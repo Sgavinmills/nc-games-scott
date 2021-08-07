@@ -145,7 +145,7 @@ describe('PATCH api/reviews/:review_id', () => {
     })
     test('status 400 - No inc_votes value on request body', async () => {
         const response = await request(app).patch('/api/reviews/1').send({ nothere: 'noo' }).expect(400);
-        expect(response.body.message).toBe('inc_votes property required');
+        expect(response.body.message).toBe('no required properties provided');
     })
     test('status 200 - Additional propertys on request body', async () => {
         const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 2, more: 'no' }).expect(200);
@@ -170,6 +170,11 @@ describe('PATCH api/reviews/:review_id', () => {
     test('status 404 - ID does not exist', async () => {
         const response = await request(app).patch('/api/reviews/9999').send({ inc_votes: 2 }).expect(404);
         expect(response.body.message).toBe('9999 not found');
+    })
+    test('status 400 - inc_votes cannot be null', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+
     })
 })
 
@@ -397,6 +402,16 @@ describe('POST /api/reviews/:review_id/comments', () => {
         const response = await request(app).post('/api/reviews/1/comments').send({ username: 'mallionaire', body: 'x'.repeat(2001) }).expect(400);
         expect(response.body.message).toBe('Value too long')
     })
+    test('status 400 - Null body provided', async () => {
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: 'mallionaire', body: null }).expect(400);
+        expect(response.body.message).toBe(`Null value not allowed`)
+
+    })
+    test('status 400 - Null username provided', async () => {
+        const response = await request(app).post('/api/reviews/1/comments').send({ username: null, body: 'This review is a waste of time' }).expect(400);
+        expect(response.body.message).toBe(`Null value not allowed`)
+
+    })
 
 })
 
@@ -488,7 +503,7 @@ describe('PATCH /api/comments/:comment_id', () => {
     })
     test('status 400 - Missing inc_votes property', async () => {
         const response = await request(app).patch('/api/comments/1').send({}).expect(400);
-        expect(response.body.message).toBe('inc_votes property required');
+        expect(response.body.message).toBe('no required properties provided');
     })
     test('status 400 - Additional properties sent', async () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: 10, something: 'else' }).expect(400);
@@ -497,6 +512,11 @@ describe('PATCH /api/comments/:comment_id', () => {
     test('status 400 - inc_votes provided with invalid data type', async () => {
         const response = await request(app).patch('/api/comments/1').send({ inc_votes: 'nope' }).expect(400);
         expect(response.body.message).toBe('Invalid data type');
+    })
+    test('status 400 - inc_votes cannot be null', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ inc_votes: null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+
     })
 
 })
@@ -647,7 +667,7 @@ describe('POST /api/reviews', () => {
             review_body: 'Do not play after drinks on christmas day',
             designer: 'Hasbrooo',
             category: 'dexterity',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(201);
         expect(response.body.reviews).toEqual({
@@ -660,7 +680,7 @@ describe('POST /api/reviews', () => {
             votes: 0,
             created_at: expect.any(String),
             comment_count: 0,
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         })
     })
     test('status 404 - Valid but non-existent username', async () => {
@@ -670,11 +690,11 @@ describe('POST /api/reviews', () => {
             review_body: 'Do not play after drinks on christmas day',
             designer: 'Hasbrooo',
             category: 'dexterity',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(404);
         expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
-        
+
     })
     test('status 400 - Title too long', async () => {
         const postSend = {
@@ -683,7 +703,7 @@ describe('POST /api/reviews', () => {
             review_body: 'Do not play after drinks on christmas day',
             designer: 'Hasbrooo',
             category: 'dexterity',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(400);
         expect(response.body.message).toBe('Value too long');
@@ -695,7 +715,7 @@ describe('POST /api/reviews', () => {
             review_body: 'd'.repeat(5001),
             designer: 'Hasbrooo',
             category: 'dexterity',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(400);
         expect(response.body.message).toBe('Value too long');
@@ -707,7 +727,7 @@ describe('POST /api/reviews', () => {
             review_body: 'd'.repeat(5001),
             designer: 'H'.repeat(101),
             category: 'dexterity',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(400);
         expect(response.body.message).toBe('Value too long');
@@ -719,7 +739,7 @@ describe('POST /api/reviews', () => {
             review_body: 'Reeeevviieww Body',
             designer: 'Hasbro',
             category: 'made up category',
-            review_img_url : 'www.yep.com'
+            review_img_url: 'www.yep.com'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(404);
         expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
@@ -773,7 +793,7 @@ describe('POST /api/reviews', () => {
             owner: 'mallionaire',
             title: 'Monopoly',
             review_body: 'Hasbrooo',
-            designer : 'Hasbro'
+            designer: 'Hasbro'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(400);
         expect(response.body.message).toBe('category property required');
@@ -785,56 +805,109 @@ describe('POST /api/reviews', () => {
             owner: 'mallionaire',
             title: 'Monopoly',
             review_body: 'Hasbrooo',
-            designer : 'Hasbro',
-            category : 'dexterity',
+            designer: 'Hasbro',
+            category: 'dexterity',
             something: 'else'
         }
         const response = await request(app).post('/api/reviews').send(postSend).expect(400);
         expect(response.body.message).toBe('Too many properties provided');
     })
-    
+    test('status 400 - owner cannot be null', async () => {
+        const postSend = {
+            owner: null,
+            title: 'Monopoly',
+            review_body: 'Hasbrooo',
+            designer: 'Hasbro',
+            category: 'dexterity',
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+    })
+    test('status 400 - title cannot be null', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: null,
+            review_body: 'Hasbrooo',
+            designer: 'Hasbro',
+            category: 'dexterity',
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+    })
+    test('status 400 - review_body cannot be null', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: null,
+            designer: 'Hasbro',
+            category: 'dexterity',
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+    })
+    test('status 400 - category cannot be null', async () => {
+        const postSend = {
+            owner: 'mallionaire',
+            title: 'Monopoly',
+            review_body: 'Hasbrooo',
+            designer: 'Hasbro',
+            category: null,
+        }
+        const response = await request(app).post('/api/reviews').send(postSend).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+    })
+   
+
 })
 
- describe('POST api/categories', () => {
+describe('POST api/categories', () => {
     test('status 201 - Creates new category', async () => {
-        const response = await request(app).post('/api/categories').send({slug : "Role playing", description : 'Dungeons n dragons etc'}).expect(201);
+        const response = await request(app).post('/api/categories').send({ slug: "Role playing", description: 'Dungeons n dragons etc' }).expect(201);
         expect(response.body.categories).toEqual({
-            slug : "Role playing", 
-            description : 'Dungeons n dragons etc'
+            slug: "Role playing",
+            description: 'Dungeons n dragons etc'
         })
     })
     test('status 400 - Slug value too long', async () => {
-        const response = await request(app).post('/api/categories').send({slug : "R".repeat(201), description : 'Dungeons n dragons etc'}).expect(400);
+        const response = await request(app).post('/api/categories').send({ slug: "R".repeat(201), description: 'Dungeons n dragons etc' }).expect(400);
         expect(response.body.message).toBe('Value too long');
-        
+
     })
     test('status 400 - Description value too long', async () => {
-        const response = await request(app).post('/api/categories').send({slug : "Roaar", description : 'D'.repeat(501)}).expect(400);
+        const response = await request(app).post('/api/categories').send({ slug: "Roaar", description: 'D'.repeat(501) }).expect(400);
         expect(response.body.message).toBe('Value too long');
-        
+
     })
     test('status 400 - Slug property missing', async () => {
-        const response = await request(app).post('/api/categories').send({description : 'Dungeons n dragons etc'}).expect(400);
+        const response = await request(app).post('/api/categories').send({ description: 'Dungeons n dragons etc' }).expect(400);
         expect(response.body.message).toBe('slug property required');
 
     })
     test('status 400 - Description property missing', async () => {
-        const response = await request(app).post('/api/categories').send({slug : 'Dungeons n dragons etc'}).expect(400);
+        const response = await request(app).post('/api/categories').send({ slug: 'Dungeons n dragons etc' }).expect(400);
         expect(response.body.message).toBe('description property required');
 
     })
     test('status 400 - Too many properties provided', async () => {
-        const response = await request(app).post('/api/categories').send({slug : 'Dungeons n dragons etc', description: 'a description', something : 'else'}).expect(400);
+        const response = await request(app).post('/api/categories').send({ slug: 'Dungeons n dragons etc', description: 'a description', something: 'else' }).expect(400);
         expect(response.body.message).toBe('Too many properties provided');
+    })
+    test('status 400 - slug cannot be null', async () => {
+        const response = await request(app).post('/api/categories').send({ slug: null, description: 'a description' }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+    })
+    test('status 400 - description cannot be null', async () => {
+        const response = await request(app).post('/api/categories').send({ slug: 'SLug name', description: null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
     })
 
 
-   
- 
 
- })   
 
- describe('DELETE /api/reviews/:review_id', () => {
+
+})
+
+describe('DELETE /api/reviews/:review_id', () => {
     test('status 204 - deletes review by id', async () => {
         const dbQryBefore = await db.query('SELECT * FROM reviews WHERE review_id = 2');
         expect(dbQryBefore.rows).toHaveLength(1);
@@ -844,7 +917,7 @@ describe('POST /api/reviews', () => {
     })
     test('status 400 - Invalid review_id', async () => {
         const response = await request(app).delete('/api/reviews/NOPE').expect(400);
-         expect(response.body.message).toBe('Invalid data type')
+        expect(response.body.message).toBe('Invalid data type')
     })
     test('status 404 - Valid but non-existent review_id', async () => {
         const response = await request(app).delete('/api/reviews/8888').expect(404);
@@ -856,8 +929,264 @@ describe('POST /api/reviews', () => {
         const response = await request(app).delete('/api/reviews/2').expect(204);
         const dbQryAfter = await db.query('SELECT * FROM comments WHERE comment_id = 1')
         expect(dbQryAfter.rows).toHaveLength(0);
+
+    })
+
+})
+
+describe('PATCH /api/reviews/:review_id', () => {
+    test('status 200 - Edit a review body', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ review_body: "This is a new body" }).expect(200);
+        expect(response.body.reviews).toEqual({
+            review_id: 1,
+            title: 'Agricola',
+            designer: 'Uwe Rosenberg',
+            owner: 'mallionaire',
+            review_img_url:
+                'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+            review_body: 'This is a new body',
+            category: 'euro game',
+            created_at: '2021-01-18T10:00:20.514Z',
+            votes: 1
+        })
+        const dbQry = await db.query('SELECT * FROM reviews WHERE review_id=1');
+        expect(dbQry.rows[0].review_body).toEqual('This is a new body');
+    })
+    test('status 200 - Body and votes can be changed in one query', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ review_body: "This is a new body", inc_votes : 1 }).expect(200);
+        expect(response.body.reviews).toEqual({
+            review_id: 1,
+            title: 'Agricola',
+            designer: 'Uwe Rosenberg',
+            owner: 'mallionaire',
+            review_img_url:
+                'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+            review_body: 'This is a new body',
+            category: 'euro game',
+            created_at: '2021-01-18T10:00:20.514Z',
+            votes: 2
+        })
+        const dbQry = await db.query('SELECT * FROM reviews WHERE review_id=1');
+        expect(dbQry.rows[0].review_body).toEqual('This is a new body');
+        expect(dbQry.rows[0].votes).toEqual(2);
+
         
     })
 
- })
+    test('status 400 - Body value too big', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ review_body: "T".repeat(5001)}).expect(400);
+        expect(response.body.message).toBe('Value too long')
+
+    })
+    test('status 400 - Invalid review id', async () => {
+        const response = await request(app).patch('/api/reviews/NOPE').send({ review_body: "Tryant"}).expect(400);
+        expect(response.body.message).toBe('Invalid data type')
+
+    })
+    test('status 404 - Review id valid but does not exist', async () => {
+        const response = await request(app).patch('/api/reviews/9999').send({ review_body: "Tryant"}).expect(404);
+        expect(response.body.message).toBe('9999 not found')
+
+    })
+
+    test('status 400 - review_body cannot be null', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ review_body: null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+
+    })
+
+})
+
+describe('PATCH /api/comments/:comment_id', () => {
+    test('status 200 - Edit a comment body', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ body: "This is a new comment body" }).expect(200);
+        expect(response.body.comments).toEqual({
+            comment_id : 1,
+            author : "bainesface",
+            review_id : 2,
+            votes : 16,
+            created_at : "2017-11-22T12:43:33.389Z",
+            body : "This is a new comment body"
+        })
+        const dbQry = await db.query('SELECT * FROM comments WHERE comment_id=1');
+        expect(dbQry.rows[0].body).toEqual('This is a new comment body');
+    })
+    test('status 200 - Body and votes can be changed in one query', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ body: "This is a new comment body", inc_votes : 10 }).expect(200);
+        expect(response.body.comments).toEqual({
+            comment_id : 1,
+            author : "bainesface",
+            review_id : 2,
+            votes : 26,
+            created_at : "2017-11-22T12:43:33.389Z",
+            body : "This is a new comment body"
+        })
+        const dbQry = await db.query('SELECT * FROM comments WHERE comment_id=1');
+        expect(dbQry.rows[0].body).toEqual('This is a new comment body');
+        expect(dbQry.rows[0].votes).toEqual(26);
+    })
+    test('status 400 - Body value too big', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ body: "T".repeat(5001)}).expect(400);
+        expect(response.body.message).toBe('Value too long')
+
+    })
+    test('status 400 - Invalid comment id', async () => {
+        const response = await request(app).patch('/api/comments/NOPE').send({ body: "Tryant"}).expect(400);
+        expect(response.body.message).toBe('Invalid data type')
+
+    })
+    test('status 404 - Comment id valid but does not exist', async () => {
+        const response = await request(app).patch('/api/comments/9999').send({ body: "Tryant"}).expect(404);
+        expect(response.body.message).toBe('9999 not found')
+
+    })
+    test('status 400 - body cannot be null', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ body: null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+
+    })
+    
+})
+
+describe('PATCH /api/users/:username', () => {
+    test('status 200 - Allows editting of a user profile', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ avatar_url : "www.newpiclink", name : "King" }).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'mallionaire',
+            avatar_url : 'www.newpiclink',
+            name : 'King'
+        })
+        const dbQryResponse = await db.query(`SELECT * FROM users WHERE username = 'mallionaire'`);
+        expect(dbQryResponse.rows[0].avatar_url).toBe('www.newpiclink');
+        expect(dbQryResponse.rows[0].name).toBe('King');
+    })
+    test('status 200 - Updated username is reflected in other tables', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ avatar_url : "www.newpiclink", name : "King", username : "Scotopher" }).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'Scotopher',
+            avatar_url : 'www.newpiclink',
+            name : 'King'
+        })
+        const dbQryResponse = await db.query(`SELECT * FROM users WHERE username = 'Scotopher'`);
+        expect(dbQryResponse.rows[0].avatar_url).toBe('www.newpiclink');
+        expect(dbQryResponse.rows[0].name).toBe('King');
+        const dbQryResponse2 = await db.query(`SELECT * FROM users WHERE username = 'mallionaire'`);
+        expect(dbQryResponse2.rows).toHaveLength(0);
+        const dbQryResponse3 = await db.query(`SELECT * FROM reviews WHERE review_id=1`);
+        expect(dbQryResponse3.rows[0].owner).toBe('Scotopher');
+        const dbQryResponse4 = await db.query(`SELECT * FROM comments WHERE comment_id=2`);
+        expect(dbQryResponse4.rows[0].author).toBe('Scotopher');
+
+    })
+    test('status 200 - Can update just username', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username : "Scotopher" }).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'Scotopher',
+            avatar_url : 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+            name : 'haz'
+        })
+    })
+    test('status 200 - Can update just avatar_url', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ avatar_url : "www.newpiclink" }).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'mallionaire',
+            avatar_url : 'www.newpiclink',
+            name : 'haz'
+        })
+    })
+    test('status 200 - Can update just name', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ name : "Rosalind"}).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'mallionaire',
+            avatar_url : 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+            name : 'Rosalind'
+        })
+    })
+    test('status 200 - Can update username and 1 other property', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: 'King', name : "Rosalind"}).expect(200);
+        expect(response.body.users).toEqual({
+            username : 'King',
+            avatar_url : 'https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg',
+            name : 'Rosalind'
+        })
+    })
+
+    test('status 400 - Does not allow null properties - username', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: null, name : "Rosalind"}).expect(400);
+        expect(response.body.message).toBe('Null value not allowed');
+    })
+    test('status 400 - Does not allow null properties - name', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: 'mallionaire', name : null}).expect(400);
+        expect(response.body.message).toBe('Null value not allowed');
+    })
+    test('status 400 - Does not allow null properties - avatar_url', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: 'mallionaire', avatar_url : null}).expect(400);
+        expect(response.body.message).toBe('Null value not allowed');
+    })
+    test('status 400 - Extra properties provided', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: 'mallionaire', extra : 'property'}).expect(400);
+        expect(response.body.message).toBe('Too many properties provided')
+
+    })
+    test('status 400 - No required properties provided', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({}).expect(400);
+        expect(response.body.message).toBe('no required properties provided')
+
+    })
+    test('status 400 - avatar_url value too big', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ avatar_url: "T".repeat(2001)}).expect(400);
+        expect(response.body.message).toBe('Value too long')
+
+    })
+    test('status 400 - username value too big', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: "T".repeat(201)}).expect(400);
+        expect(response.body.message).toBe('Value too long')
+
+    })
+    test('status 400 - name value too big', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ name: "T".repeat(201)}).expect(400);
+        expect(response.body.message).toBe('Value too long')
+    })
+    test('status 404 - Username param does not exist', async () => {
+        const response = await request(app).patch('/api/users/TheKing').send({ name: "Tryant"}).expect(404);
+        expect(response.body.message).toBe('TheKing not found')
+    })
+    test('status 404 - New username is not unique', async () => {
+        const response = await request(app).patch('/api/users/mallionaire').send({ username: "bainesface"}).expect(400);
+        expect(response.body.message).toBe(`A property has failed its requirement to be unique`)
+    })
+    
+describe('GET /api/reviews/:title', () => {
+    test('status 200 - Returns array of reviews with specified title', async () => {
+        const response = await request(app).get('/api/reviews/Jenga').expect(200);
+        expect(response.body.reviews).toBeInstanceOf(Array);
+        expect(response.body.reviews[0]).toEqual({
+            review_id: 2,
+            designer: 'Leslie Scott',
+            title: 'Jenga',
+            owner: 'philippaclaire9',
+            review_img_url:
+                'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+            review_body: 'Fiddly fun for all the family',
+            category: 'dexterity',
+            created_at: '2021-01-18T10:01:41.251Z',
+            votes: 5,
+            comment_count: '3'
+        })
+    })
+})
+    
+    
+
+    //couldmake this update table reusabl?! Seems like a good one to try iton...
+
+})
+
+// describe('GET /api/reviews/:title', () => {
+
+// })
+
+// describe('POST /api/users', () => {
+
+// })
 

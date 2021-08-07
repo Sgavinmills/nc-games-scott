@@ -1,4 +1,4 @@
-const { dropReviewById, insertReviews, insertCommentByReviewId, selectReviewById, updateReviewsById, selectReviews, selectCommentsByReviewId } = require('../models/reviews-model.js')
+const { dropReviewById, insertReviews, insertCommentByReviewId, selectReviewsByIdOrTitle, updateReviewsById, selectReviews, selectCommentsByReviewId } = require('../models/reviews-model.js')
 
 const getReviews = (req, res, next) => {
     const { sort_by, order, category, limit, p } = req.query;
@@ -10,9 +10,9 @@ const getReviews = (req, res, next) => {
     })
 }
 
-const getReviewsById = (req, res, next) => {
+const getReviewsByIdOrTitle = (req, res, next) => {
     const { review_id } = req.params;
-    selectReviewById(review_id).then((reviews) => {
+    selectReviewsByIdOrTitle(review_id).then((reviews) => {
         res.status(200).send({reviews});
     }).catch(err => {
         next(err);
@@ -20,8 +20,8 @@ const getReviewsById = (req, res, next) => {
 }
 
 const patchReviewsById = (req, res, next) => {
-    const { review_id } = req.params;
-    updateReviewsById(review_id, req.body).then(reviews => {
+    //const { review_id } = req.params;
+    updateReviewsById(req.params, req.body).then(reviews => {
         res.status(200).send({reviews});
     }).catch(err => {
         next(err);
@@ -64,4 +64,4 @@ const deleteReviewsById = (req, res, next) => {
     })
 }
 
-module.exports = { deleteReviewsById, postReviews, postCommentsByReviewId, getReviewsById, patchReviewsById, getReviews, getCommentsByReviewId };
+module.exports = { deleteReviewsById, postReviews, postCommentsByReviewId, getReviewsByIdOrTitle, patchReviewsById, getReviews, getCommentsByReviewId };

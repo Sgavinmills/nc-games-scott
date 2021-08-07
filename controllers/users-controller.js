@@ -1,5 +1,5 @@
 
-const { selectUsers, selectUserByUserName } = require('../models/users-model.js')
+const { updateUsersByUserName, selectUsers, selectUsersByUserName } = require('../models/users-model.js')
 
 const getUsers = (req, res, next) => {
     selectUsers().then((users) => {
@@ -10,13 +10,22 @@ const getUsers = (req, res, next) => {
     })
 }
 
-const getUserByUserName = (req, res, next) => {
+const getUsersByUserName = (req, res, next) => {
     const { username } = req.params;
-    selectUserByUserName(username).then((users) => {
+    selectUsersByUserName(username).then((users) => {
         res.status(200).send({users});
     }).catch(err => {
         next(err);
     })
 }
 
-module.exports =  { getUsers, getUserByUserName };
+const patchUsersByUserName = (req, res, next) => {
+    const { username } = req.params;
+    updateUsersByUserName(username, req.body).then((users) => {
+        res.status(200).send({users});
+    }).catch(err => {
+        next(err);
+    })
+}
+
+module.exports =  { getUsers, getUsersByUserName, patchUsersByUserName };

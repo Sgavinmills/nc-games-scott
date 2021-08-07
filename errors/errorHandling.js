@@ -20,6 +20,10 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
         res.status(400).send( { message: 'Limit and page must be greater than 0' })
     } else if(err.code === '2201X') {
         res.status(400).send( { message : "Limit and page must be greater than 0" })
+    } else if(err.code === '23502') { //Some null values cause other errors such as psql syntax errors so are handled elsewhere
+        res.status(400).send( { message : "Null value not allowed" })
+    } else if(err.code === '23505') { //Updating username with a username that already exists (duplicate key value violates unique constraint "users_pkey")
+        res.status(400).send( { message : "A property has failed its requirement to be unique"})
     }
     else next(err);
 }

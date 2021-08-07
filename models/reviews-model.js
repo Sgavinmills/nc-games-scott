@@ -1,5 +1,5 @@
 const db = require('../db/connection.js');
-const { checkExists, checkMissingProperty, checkExtraProperties, isValidQuery } = require('../utils.js');
+const { checkExists, checkMissingProperty, checkExtraProperties, isValidQuery, noRequiredPropertys, checkForNulls } = require('../utils.js');
 
 
 const selectReviews = async (sort_by = 'created_at', order, category, limit = 10, p = 1) => {
@@ -46,7 +46,7 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
 }
 
 
-const selectReviewById = async (review_id) => {
+const selectReviewsByIdOrTitle = async (review_id) => {
 
     const qryResponse = await db.query(`SELECT reviews.*, COUNT(comment_id) AS comment_count
                                          FROM REVIEWS 
@@ -61,15 +61,35 @@ const selectReviewById = async (review_id) => {
     return qryResponse.rows[0];
 }
 
-const updateReviewsById = async (review_id, body) => {
-    const { inc_votes } = body;
-    const providedProps = Object.keys(body);
-    await checkMissingProperty(['inc_votes'], providedProps);
-    const qryResponse = await db.query(`UPDATE reviews SET votes = 
-                                           (CASE WHEN (votes + $1) >= 0
-                                            THEN (votes + $1) ELSE 0 END)
-                                        WHERE review_id = $2
-                                        RETURNING *;`, [inc_votes, review_id])
+const updateReviewsById = async (params, requestBody) => {
+    const { inc_votes, review_body } = requestBody;
+    const { review_id } = params;
+    const providedProps = Object.keys(requestBody);
+ 
+   
+    await noRequiredPropertys(['inc_votes', 'review_body'], providedProps);
+    await checkForNulls([review_body, inc_votes]);
+    const qryValues = [review_id];
+    let qryStr = `UPDATE reviews SET `;
+    if(inc_votes) {
+        qryValues.push(inc_votes);
+        qryStr += `votes = 
+        (CASE WHEN (votes + $${qryValues.length}) >= 0
+         THEN (votes + $${qryValues.length}) ELSE 0 END) `
+    }
+
+    if(review_body) {
+        if(inc_votes)
+            qryStr += ', '
+        qryValues.push(review_body);
+        qryStr += `review_body = $${qryValues.length} `
+    }
+    
+
+    qryStr += `WHERE review_id = $1 RETURNING *;`
+    const qryResponse = await db.query(qryStr, qryValues);
+
+
     if (qryResponse.rows.length === 0) {
         return Promise.reject({ status: 404, msg: `${review_id} not found` })
     }
@@ -101,7 +121,7 @@ const insertCommentByReviewId = async (review_id, reqBody) => {
 
     await checkExtraProperties(['username', 'body'], bodyProps);
     await checkMissingProperty(['username', 'body'], bodyProps);
-  
+    await checkForNulls([username, body]);
     const qryResponse = await db.query(`INSERT INTO comments
                     (author, body, review_id)
                     VALUES
@@ -158,7 +178,7 @@ const dropReviewById = async (review_id) => {
     }
 }
 
-module.exports = { dropReviewById, insertReviews, insertCommentByReviewId, selectReviewById, updateReviewsById, selectReviews, selectCommentsByReviewId };
+module.exports = { dropReviewById, insertReviews, insertCommentByReviewId, selectReviewsByIdOrTitle, updateReviewsById, selectReviews, selectCommentsByReviewId };
 
 
 
