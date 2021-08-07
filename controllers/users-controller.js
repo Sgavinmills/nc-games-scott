@@ -1,5 +1,5 @@
 
-const { updateUsersByUserName, selectUsers, selectUsersByUserName } = require('../models/users-model.js')
+const { updateUsersByUserName, selectUsers, selectUsersByUserName, insertUsers } = require('../models/users-model.js')
 
 const getUsers = (req, res, next) => {
     selectUsers().then((users) => {
@@ -28,4 +28,11 @@ const patchUsersByUserName = (req, res, next) => {
     })
 }
 
-module.exports =  { getUsers, getUsersByUserName, patchUsersByUserName };
+const postUsers = (req, res, next) => {
+    insertUsers(req.body).then(users => {
+        res.status(201).send({users});
+    }).catch(err => {
+        next(err);
+    })
+}
+module.exports =  { getUsers, getUsersByUserName, patchUsersByUserName, postUsers };

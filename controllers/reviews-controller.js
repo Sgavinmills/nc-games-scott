@@ -11,8 +11,8 @@ const getReviews = (req, res, next) => {
 }
 
 const getReviewsByIdOrTitle = (req, res, next) => {
-    const { review_id } = req.params;
-    selectReviewsByIdOrTitle(review_id).then((reviews) => {
+    const review_id_or_title  = req.params.review_id;
+    selectReviewsByIdOrTitle(review_id_or_title).then((reviews) => {
         res.status(200).send({reviews});
     }).catch(err => {
         next(err);

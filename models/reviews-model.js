@@ -46,19 +46,30 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
 }
 
 
-const selectReviewsByIdOrTitle = async (review_id) => {
+const selectReviewsByIdOrTitle = async (review_id_or_title) => {
 
-    const qryResponse = await db.query(`SELECT reviews.*, COUNT(comment_id) AS comment_count
-                                         FROM REVIEWS 
-                                        LEFT JOIN comments ON reviews.review_id = comments.review_id
-                                        WHERE reviews.review_id = $1
-                                        GROUP BY reviews.review_id`, [review_id]);
+    
+    const qryValues = [review_id_or_title];
+    let qryStr = `SELECT reviews.*, COUNT(comment_id) AS comment_count
+                  FROM REVIEWS 
+                  LEFT JOIN comments ON reviews.review_id = comments.review_id `
 
-    if (qryResponse.rows.length === 0) {
-        return Promise.reject({ status: 404, msg: `${review_id} not found` })
+    let isID = false;
+    if(/^\d+$/.test(review_id_or_title)) isID = true;
+    if(isID) {
+        qryStr += `WHERE reviews.review_id = $1 `;
+       
+    } else {
+        qryStr += `WHERE reviews.title = $1 `;
     }
-
-    return qryResponse.rows[0];
+    qryStr += `GROUP BY reviews.review_id`;
+    const qryResponse = await db.query(qryStr, qryValues);
+    if (qryResponse.rows.length === 0) {
+        return Promise.reject({ status: 404, msg: `${review_id_or_title} not found` })
+    }
+    if(isID) {
+      return qryResponse.rows[0];
+    } else return qryResponse.rows;
 }
 
 const updateReviewsById = async (params, requestBody) => {

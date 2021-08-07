@@ -40,8 +40,8 @@
                     "total_count" : 27
                 }
             },
-            "/api/reviews/:review_id": {
-                "description": "serves a review object from review_id",
+            "/api/reviews/:review_id_or_title": {
+                "description": "serves a review object from review_id or review title - titles will all numbers are treated as review_ids and cannot be searched for by title",
                 "queries": [],
                 "exampleResponse": {
                     "review_id": 2,
@@ -147,19 +147,33 @@
                     "slug" : "Category name",
                     "description" : "A sick description"
                 }
+            },
+            "/api/users" : {
+                "description" : "Allows adding of a new user",
+                "exampleRequestBody" : {
+                     "username" : "Kingly", 
+                     "name" : "Scott", 
+                     "avatar_url" : "www.testpic.com" 
+                },
+                "exampleResponse" : {
+                    "username" : "Kingly", 
+                    "name" : "Scott", 
+                    "avatar_url" : "www.testpic.com" 
+                }
             }
         },
         "PATCH": {
             "/api/reviews/:review_id" : {
-                "description" : "Allows changing of votes on a review",
+                "description" : "Allows changing of votes and edtting of review body",
                 "exampleRequestBody" : {
-                     "inc_votes": -2 
+                     "inc_votes": -2,
+                     "review_body" : "This is a new review body"
                 },
                 "exampleResponse" : {
                     "reviews": {
                         "review_id": 1,
                         "title": "Culture a Love of Agriculture With Agricola",
-                        "review_body": "You could sum up Agricola with the simple phrase 'Farmyeard Fun' but the mechanics and game play add so much more than that. You'll find yourself torn between breeding pigs, or sowing crops. Its joyeous and rewarding and it makes you think of time spent outside, which is much harder to do these days!",
+                        "review_body": "This is a new review body",
                         "designer": "Uwe Rosenberg",
                         "review_img_url": "https://images.pexels.com/photos/4917821/pexels-photo-4917821.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
                         "votes": 0,
@@ -170,9 +184,10 @@
                 }
             },
             "/api/comments/:comment_id" : {
-                "description" : "Allows changing of votes on a comment",
+                "description" : "Allows changing of votes and editting of comment body",
                 "exampleRequestBody" : {
-                    "inc_votes" : 2
+                    "inc_votes" : 2,
+                    "body" : "This is a new body"
                 },
                 "exampleResponse" : {
                     "comment_id" : 1,
@@ -180,7 +195,20 @@
                     "review_id" : 2,
                     "votes" : 21,
                     "created_at" : "2017-11-22T12:43:33.389Z",
-                    "body" : "I loved this game too!"
+                    "body" : "This is a new body"
+                }
+            },
+            "/api/users/:username" : {
+                "description" : "Allows editting of a user profile",
+                "exampleRequestBody" : {
+                    "username": "mallionaire666",
+                    "avatar_url": "www.newpiclink",
+                    "name": "King2"
+                },
+                "exampleResponse" : {
+                    "username": "mallionaire666",
+                    "avatar_url": "www.newpiclink",
+                    "name": "King2"
                 }
             }
         },

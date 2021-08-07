@@ -1,5 +1,5 @@
 const db = require('../db/connection.js');
-const { updateTable, checkForNulls, checkExtraProperties, noRequiredPropertys } = require('../utils.js');
+const { updateTable, checkForNulls, checkExtraProperties, noRequiredPropertys, checkMissingProperty } = require('../utils.js');
 
 
 const selectUsers = async () => {
@@ -38,4 +38,20 @@ const updateUsersByUserName = async (currentUsername, reqBody) => {
 
 }
 
-module.exports = { selectUsers, selectUsersByUserName,updateUsersByUserName };
+const insertUsers = async (reqBody) => {
+    const { username, name, avatar_url } = reqBody;
+
+    const providedKeys = Object.keys(reqBody);
+    const qryValues = [ username, name, avatar_url]
+
+    await checkMissingProperty(['username', 'name'], providedKeys )
+    await checkExtraProperties(['username' ,'name' ,'avatar_url'],providedKeys)
+    const qryResponse = await db.query(`INSERT INTO users
+                                  (username, name, avatar_url)
+                                  VALUES
+                                  ($1,$2,$3)
+                                  RETURNING *;`, qryValues)
+    return qryResponse.rows[0];
+}
+
+module.exports = { selectUsers, selectUsersByUserName,updateUsersByUserName, insertUsers };
