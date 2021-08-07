@@ -46,10 +46,6 @@ module.exports = [
     {
         comment_id : 4,
         voted_by : "philippaclaire9"
-    },
-    {
-        comment_id : 3,
-        voted_by : "dav3rid"
     }
 ];
 

@@ -67,11 +67,6 @@ module.exports = [
         review_id : 3,
         voted_by : "philippaclaire9"
     }
-    ,
-    {
-        review_id : 3,
-        voted_by : "dav3rid"
-    }
 ];
 
 

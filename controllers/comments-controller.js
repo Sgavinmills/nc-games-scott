@@ -1,4 +1,4 @@
-const { dropCommentById, updateCommentById } = require('../models/comments-model.js');
+const { dropCommentById, updateCommentById,selectReviewsByUserComments } = require('../models/comments-model.js');
 
 const deleteCommentById = (req, res, next) => {
     const { comment_id } = req.params;
@@ -18,4 +18,13 @@ const patchCommentById = (req, res, next) => {
     })
 }
 
-module.exports = { deleteCommentById, patchCommentById };
+const getReviewsByUserComments = (req,res,next) => {
+    const { username } = req.params;
+    selectReviewsByUserComments(username).then(reviews => {
+        res.status(200).send({reviews});
+    }).catch(err => {
+        next(err);
+    })
+}
+
+module.exports = { deleteCommentById, patchCommentById, getReviewsByUserComments };

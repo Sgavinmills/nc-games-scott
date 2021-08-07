@@ -1,7 +1,0 @@
-You are now connected to database "nc_games_test" as user "scott".
- review_id |       title       |  review_writer  | comment_writer 
------------+-------------------+-----------------+----------------
-         3 | Ultimate Werewolf | bainesface      | mallionaire
-         2 | Jenga             | philippaclaire9 | mallionaire
-(2 rows)
-

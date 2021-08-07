@@ -1,5 +1,5 @@
 const db = require('../db/connection.js');
-const { checkExtraProperties, checkMissingProperty, noRequiredPropertys, checkForNulls } = require('../utils.js');
+const { checkExtraProperties, checkMissingProperty, noRequiredPropertys, checkForNulls, checkExists } = require('../utils.js');
 
 const dropCommentById = async (comment_id) => {
     const response = await db.query(`DELETE FROM comments 
@@ -51,4 +51,21 @@ const updateCommentById = async (comment_id, reqBody) => {
     return qryResponse.rows[0];
 }
 
-module.exports = { dropCommentById, updateCommentById };
+const selectReviewsByUserComments = async (username)  =>{
+    
+    const qryResponse = await db.query(`SELECT reviews.review_id, reviews.title, reviews.category,reviews.created_at,reviews.votes, reviews.owner
+                                        FROM reviews
+                                        JOIN comments
+                                        ON reviews.review_id = comments.review_id
+                                        JOIN users
+                                        ON comments.author = users.username
+                                        WHERE comments.author = $1`, [username]);
+   
+    if (qryResponse.rows.length === 0) {
+        await checkExists('users', 'username', username)
+        // return Promise.reject({ status: 404, msg: `${username} not found` })
+    }
+    return qryResponse.rows;
+}
+
+module.exports = { dropCommentById, updateCommentById, selectReviewsByUserComments };

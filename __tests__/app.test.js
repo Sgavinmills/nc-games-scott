@@ -1267,81 +1267,162 @@ describe('GET /api/reviews/:title', () => {
 
 describe('POST /api/users', () => {
     test('status 201 - allows creating a new user, responds with newly created user', async () => {
-        const postBody = { username : 'Kingly', name : 'Scott', avatar_url : 'www.testpic.com' };
+        const postBody = { username: 'Kingly', name: 'Scott', avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(201);
         expect(response.body.users).toBeInstanceOf(Object);
         expect(response.body.users).toEqual({
-            username : 'Kingly', name : 'Scott', avatar_url : 'www.testpic.com'
+            username: 'Kingly', name: 'Scott', avatar_url: 'www.testpic.com'
         })
         dbQryResponse = await db.query(`SELECT * FROM users WHERE username = 'Kingly'`)
         expect(dbQryResponse.rows[0].name).toBe('Scott');
-     
+
     })
     test('status 400 - username too long', async () => {
-        const postBody = { username : 'K'.repeat(201), name : 'Scott', avatar_url : 'www.testpic.com' };
+        const postBody = { username: 'K'.repeat(201), name: 'Scott', avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Value too long');
     })
     test('status 400 - name too long', async () => {
-        const postBody = { username : 'Kingly', name : 'S'.repeat(201), avatar_url : 'www.testpic.com' };
+        const postBody = { username: 'Kingly', name: 'S'.repeat(201), avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Value too long');
     })
     test('status 400 - avatar url too long', async () => {
-        const postBody = { username : 'Kingly', name : 'Scott', avatar_url : 'w'.repeat(1001) };
+        const postBody = { username: 'Kingly', name: 'Scott', avatar_url: 'w'.repeat(1001) };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Value too long');
     })
     test('status 400 - missing name property', async () => {
-        const postBody = { username : 'Kingly', avatar_url : 'www.testlink' };
+        const postBody = { username: 'Kingly', avatar_url: 'www.testlink' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('name property required');
 
     })
     test('status 400 - missing username property', async () => {
-        const postBody = { name : 'Kingly', avatar_url : 'www.testlink' };
+        const postBody = { name: 'Kingly', avatar_url: 'www.testlink' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('username property required');
 
     })
 
     test('status 400 - too many properties provided', async () => {
-        const postBody = { name : 'Kingly', avatar_url : 'www.testlink', username: 'SCOTTY', something : 'else' };
+        const postBody = { name: 'Kingly', avatar_url: 'www.testlink', username: 'SCOTTY', something: 'else' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Too many properties provided');
 
 
     })
     test('status 201 - avatar_url is optional', async () => {
-        const postBody = { name : 'Kingly', username: 'SCOTTY' };
+        const postBody = { name: 'Kingly', username: 'SCOTTY' };
         const response = await request(app).post('/api/users').send(postBody).expect(201);
         expect(response.body.users).toBeInstanceOf(Object);
         expect(response.body.users).toEqual({
-            name : 'Kingly', username : 'SCOTTY', avatar_url : null
+            name: 'Kingly', username: 'SCOTTY', avatar_url: null
         })
     })
-    test('status 400 - doesnt accept null username value' , async () => {
-        const postBody = { name : 'Kingly', username: null, avatar_url : 'www.testpic.com' };
+    test('status 400 - doesnt accept null username value', async () => {
+        const postBody = { name: 'Kingly', username: null, avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Null value not allowed');
     })
-    test('status 400 - doesnt accept null name value' , async () => {
-        const postBody = { username : 'Kingly', name: null, avatar_url : 'www.testpic.com' };
+    test('status 400 - doesnt accept null name value', async () => {
+        const postBody = { username: 'Kingly', name: null, avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('Null value not allowed');
     })
-    test('status 400 - username must be unique' , async () => {
-        const postBody = { username : 'mallionaire', name: 'Scott', avatar_url : 'www.testpic.com' };
+    test('status 400 - username must be unique', async () => {
+        const postBody = { username: 'mallionaire', name: 'Scott', avatar_url: 'www.testpic.com' };
         const response = await request(app).post('/api/users').send(postBody).expect(400);
         expect(response.body.message).toBe('A property has failed its requirement to be unique');
     })
 
-   
-
-   
-   
-
-
-    //insertcategroies checks for null??
 })
+    //serves an array of all reviews a user has voted on 
+    describe('GET /api/votes/:username/reviews', () => {
+        test('status 200 - gets all reviews voted/liked by a user', async () => {
+            const response = await request(app).get('/api/votes/mallionaire/reviews').expect(200);
+            expect(response.body.reviews).toHaveLength(7);
+            response.body.reviews.forEach(review => {
+                expect(review).toEqual(expect.objectContaining({
+                    review_id: expect.any(Number),
+                    title: expect.any(String),
+                    category: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    owner: expect.any(String),
+
+                }))
+
+            })
+        })
+
+        test('status 404 - username doesnt exist', async () => {
+            const response = await request(app).get('/api/votes/NOPE/reviews').expect(404);
+            expect(response.body.message).toBe('NOPE not found');
+        })
+        test('status - username exists but has not voted on any reviews', async () => {
+            const response = await request(app).get('/api/votes/dav3rid/reviews').expect(200);
+            expect(response.body.reviews).toHaveLength(0);
+
+        })
+
+    })
+    //serves an array of all comments a user has voted on
+    describe('GET /api/votes/:username/comments', () => {
+        test('status 200 - gets all comments voted/liked by a user', async () => {
+            const response = await request(app).get('/api/votes/mallionaire/comments').expect(200);
+            expect(response.body.comments).toHaveLength(5);
+            response.body.comments.forEach(comment => {
+                expect(comment).toEqual(expect.objectContaining({
+                    comment_id: expect.any(Number),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    author: expect.any(String),
+                    review_title: expect.any(String)
+                }))
+
+            })
+        })
+
+        test('status 404 - username doesnt exist', async () => {
+            const response = await request(app).get('/api/votes/NOPE/comments').expect(404);
+            expect(response.body.message).toBe('NOPE not found');
+        })
+        test('status - username exists but has not voted on any reviews', async () => {
+            const response = await request(app).get('/api/votes/dav3rid/comments').expect(200);
+            expect(response.body.comments).toHaveLength(0);
+
+        })
+
+    })
+    //serves an array of reviews that a user has commented on 
+    describe('GET /api/comments/:username/reviews', () => {
+        test('status 200 - gets all reviews that user has commented on', async () => {
+            const response = await request(app).get('/api/comments/mallionaire/reviews').expect(200);
+            expect(response.body.reviews).toHaveLength(2);
+            response.body.reviews.forEach(review => {
+                expect(review).toEqual(expect.objectContaining({
+                    review_id: expect.any(Number),
+                    title: expect.any(String),
+                    category: expect.any(String),
+                    created_at: expect.any(String),
+                    votes: expect.any(Number),
+                    owner: expect.any(String),
+                }))
+
+            })
+        })
+
+        test('status 404 - username doesnt exist', async () => {
+            const response = await request(app).get('/api/comments/NOPE/reviews').expect(404);
+            expect(response.body.message).toBe('NOPE not found');
+        })
+        test('status - username exists but has not commented on any reviews', async () => {
+            const response = await request(app).get('/api/comments/dav3rid/reviews').expect(200);
+            expect(response.body.reviews).toHaveLength(0);
+
+        })
+    })
+
+
 
