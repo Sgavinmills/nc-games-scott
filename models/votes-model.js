@@ -13,7 +13,6 @@ const selectVotedReviewsByUser = async (username) => {
     
     if (qryResponse.rows.length === 0) {
         await checkExists('users', 'username', username)
-      // return Promise.reject({ status: 404, msg: `${username} not found` })
     }
     return qryResponse.rows;
 }
@@ -31,7 +30,6 @@ const selectVotedCommentsByUser = async (username) => {
                                   `, [username]);
     if (qryResponse.rows.length === 0) {
         await checkExists('users', 'username', username)
-      // return Promise.reject({ status: 404, msg: `${username} not found` })
     }
     return qryResponse.rows;
 }

@@ -4,6 +4,7 @@ const seed = require('../db/seeds/seed.js');
 const request = require('supertest');
 const app = require('../app.js');
 const JSONEndPointsFile = require('../endpointlist.json');
+const { createRefObj } = require('../db/utils/data-manipulation.js');
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -660,6 +661,10 @@ describe('POST /api/reviews', () => {
             created_at: expect.any(String),
             comment_count: 0
         })
+        let createdAtTime = new Date(response.body.reviews.created_at).getTime();
+        let secondAgo = new Date().getTime() - 1000;
+        expect(createdAtTime).toBeGreaterThan(secondAgo);
+
     })
     test('status 200 - allows an optional review_img_url property to be provided', async () => {
         const postSend = {
@@ -1337,92 +1342,165 @@ describe('POST /api/users', () => {
     })
 
 })
-    //serves an array of all reviews a user has voted on 
-    describe('GET /api/votes/:username/reviews', () => {
-        test('status 200 - gets all reviews voted/liked by a user', async () => {
-            const response = await request(app).get('/api/votes/mallionaire/reviews').expect(200);
-            expect(response.body.reviews).toHaveLength(7);
-            response.body.reviews.forEach(review => {
-                expect(review).toEqual(expect.objectContaining({
-                    review_id: expect.any(Number),
-                    title: expect.any(String),
-                    category: expect.any(String),
-                    created_at: expect.any(String),
-                    votes: expect.any(Number),
-                    owner: expect.any(String),
+//serves an array of all reviews a user has voted on 
+describe('GET /api/votes/:username/reviews', () => {
+    test('status 200 - gets all reviews voted/liked by a user', async () => {
+        const response = await request(app).get('/api/votes/mallionaire/reviews').expect(200);
+        expect(response.body.reviews).toHaveLength(7);
+        response.body.reviews.forEach(review => {
+            expect(review).toEqual(expect.objectContaining({
+                review_id: expect.any(Number),
+                title: expect.any(String),
+                category: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                owner: expect.any(String),
 
-                }))
-
-            })
-        })
-
-        test('status 404 - username doesnt exist', async () => {
-            const response = await request(app).get('/api/votes/NOPE/reviews').expect(404);
-            expect(response.body.message).toBe('NOPE not found');
-        })
-        test('status - username exists but has not voted on any reviews', async () => {
-            const response = await request(app).get('/api/votes/dav3rid/reviews').expect(200);
-            expect(response.body.reviews).toHaveLength(0);
-
-        })
-
-    })
-    //serves an array of all comments a user has voted on
-    describe('GET /api/votes/:username/comments', () => {
-        test('status 200 - gets all comments voted/liked by a user', async () => {
-            const response = await request(app).get('/api/votes/mallionaire/comments').expect(200);
-            expect(response.body.comments).toHaveLength(5);
-            response.body.comments.forEach(comment => {
-                expect(comment).toEqual(expect.objectContaining({
-                    comment_id: expect.any(Number),
-                    created_at: expect.any(String),
-                    votes: expect.any(Number),
-                    author: expect.any(String),
-                    review_title: expect.any(String)
-                }))
-
-            })
-        })
-
-        test('status 404 - username doesnt exist', async () => {
-            const response = await request(app).get('/api/votes/NOPE/comments').expect(404);
-            expect(response.body.message).toBe('NOPE not found');
-        })
-        test('status - username exists but has not voted on any reviews', async () => {
-            const response = await request(app).get('/api/votes/dav3rid/comments').expect(200);
-            expect(response.body.comments).toHaveLength(0);
-
-        })
-
-    })
-    //serves an array of reviews that a user has commented on 
-    describe('GET /api/comments/:username/reviews', () => {
-        test('status 200 - gets all reviews that user has commented on', async () => {
-            const response = await request(app).get('/api/comments/mallionaire/reviews').expect(200);
-            expect(response.body.reviews).toHaveLength(2);
-            response.body.reviews.forEach(review => {
-                expect(review).toEqual(expect.objectContaining({
-                    review_id: expect.any(Number),
-                    title: expect.any(String),
-                    category: expect.any(String),
-                    created_at: expect.any(String),
-                    votes: expect.any(Number),
-                    owner: expect.any(String),
-                }))
-
-            })
-        })
-
-        test('status 404 - username doesnt exist', async () => {
-            const response = await request(app).get('/api/comments/NOPE/reviews').expect(404);
-            expect(response.body.message).toBe('NOPE not found');
-        })
-        test('status - username exists but has not commented on any reviews', async () => {
-            const response = await request(app).get('/api/comments/dav3rid/reviews').expect(200);
-            expect(response.body.reviews).toHaveLength(0);
+            }))
 
         })
     })
 
+    test('status 404 - username doesnt exist', async () => {
+        const response = await request(app).get('/api/votes/NOPE/reviews').expect(404);
+        expect(response.body.message).toBe('NOPE not found');
+    })
+    test('status - username exists but has not voted on any reviews', async () => {
+        const response = await request(app).get('/api/votes/dav3rid/reviews').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+
+    })
+
+})
+//serves an array of all comments a user has voted on
+describe('GET /api/votes/:username/comments', () => {
+    test('status 200 - gets all comments voted/liked by a user', async () => {
+        const response = await request(app).get('/api/votes/mallionaire/comments').expect(200);
+        expect(response.body.comments).toHaveLength(5);
+        response.body.comments.forEach(comment => {
+            expect(comment).toEqual(expect.objectContaining({
+                comment_id: expect.any(Number),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                author: expect.any(String),
+                review_title: expect.any(String)
+            }))
+
+        })
+    })
+
+    test('status 404 - username doesnt exist', async () => {
+        const response = await request(app).get('/api/votes/NOPE/comments').expect(404);
+        expect(response.body.message).toBe('NOPE not found');
+    })
+    test('status - username exists but has not voted on any reviews', async () => {
+        const response = await request(app).get('/api/votes/dav3rid/comments').expect(200);
+        expect(response.body.comments).toHaveLength(0);
+
+    })
+
+})
+//serves an array of reviews that a user has commented on 
+describe('GET /api/comments/:username/reviews', () => {
+    test('status 200 - gets all reviews that user has commented on', async () => {
+        const response = await request(app).get('/api/comments/mallionaire/reviews').expect(200);
+        expect(response.body.reviews).toHaveLength(2);
+        response.body.reviews.forEach(review => {
+            expect(review).toEqual(expect.objectContaining({
+                review_id: expect.any(Number),
+                title: expect.any(String),
+                category: expect.any(String),
+                created_at: expect.any(String),
+                votes: expect.any(Number),
+                owner: expect.any(String),
+            }))
+
+        })
+    })
+
+    test('status 404 - username doesnt exist', async () => {
+        const response = await request(app).get('/api/comments/NOPE/reviews').expect(404);
+        expect(response.body.message).toBe('NOPE not found');
+    })
+    test('status - username exists but has not commented on any reviews', async () => {
+        const response = await request(app).get('/api/comments/dav3rid/reviews').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+
+    })
+})
+
+//how to insert data into query? new Date(currentTImeLess5mins) not working due to invalid format!?
+describe('GET api/reviews', () => {
+    test('status 200 - Added ?time=10 query to allow user to select minutes ago', async () => {
+        let currentTimeLess5Mins = new Date()-300000;
+        let currentTimeLess8mins = new Date()-480000;
+        let currentTimeLess12mins = new Date()-720000;
+        const response = await request(app).get('/api/reviews?time=10').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response2 = await request(app).get('/api/reviews?time=10').expect(200);
+        expect(response2.body.reviews).toHaveLength(1);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response3 = await request(app).get('/api/reviews?time=10').expect(200);
+        expect(response3.body.reviews).toHaveLength(3);
+    })
+    test('status 200 - Added ?time=10 query works with category query too', async () => {
+        let currentTimeLess5Mins = new Date()-300000;
+        let currentTimeLess8mins = new Date()-480000;
+        let currentTimeLess12mins = new Date()-720000;
+        const response = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response2 = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+        expect(response2.body.reviews).toHaveLength(1);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'euro game')`)
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response3 = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+        expect(response3.body.reviews).toHaveLength(2);
+    })
+    test('status 200 - works for different time limits', async () => {
+        //Date of earliest test data review in January
+        let testDate = new Date(1610010368077);
+        let currentDate = new Date();
+        //extra 5 mins to account for any delays
+        let minutesAgo = Math.floor((currentDate-testDate)/1000/60) + 5
+        const response = await request(app).get(`/api/reviews?time=${minutesAgo}&limit=15`).expect(200);
+        expect(response.body.reviews).toHaveLength(11);
+        
+    })
+    test('status 400 - no negative times', async () => {
+        const response = await request(app).get('/api/reviews?time=-10').expect(400);
+        expect(response.body.message).toBe('time must be a positive integer of minutes')
+    })
+    test('status 400 - no decimal times', async () => {
+        const response = await request(app).get('/api/reviews?time=10.5').expect(400);
+        expect(response.body.message).toBe('time must be a positive integer of minutes')
+    })
+    test('status 400 - no non-integer times', async () => {
+        const response = await request(app).get('/api/reviews?time=NOPE').expect(400);
+        expect(response.body.message).toBe('time must be a positive integer of minutes')
+    })
+    test('status 200 - Valid time constraint with no reviews returns empty array', async () => {
+        const response = await request(app).get('/api/reviews?time=3').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+        expect(response.body.reviews).toBeInstanceOf(Array);
+
+    })
+})
 
 
+
+
+
+
+
+
+
+    

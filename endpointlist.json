@@ -23,7 +23,8 @@
                     "sort_by",
                     "order",
                     "limit",
-                    "p"
+                    "p",
+                    "time"
                 ],
                 "exampleResponse": {
                     "reviews": [
