@@ -2,7 +2,15 @@ const db = require('../db/connection.js');
 const { checkExists, checkMissingProperty, checkExtraProperties, isValidQuery, noRequiredPropertys, checkForNulls } = require('../utils.js');
 
 
-const selectReviews = async (sort_by = 'created_at', order, category, limit = 10, p = 1, time) => {
+const selectReviews = async (sort_by = 'created_at', order, category, limit = 10, p = 1, minutes, hours, days, months) => {
+    let period;
+    if(minutes || hours || days || months) {
+        const periods = [minutes, hours, days, months];
+        let arr = periods.filter(period => period);
+        if(arr.length > 1) {
+            return Promise.reject( { status : 400, msg : "Only one time period can be provided" })
+        } else period = minutes ? 'minutes' : hours ? 'hours' : days ? 'days' : 'months'; 
+    }
     const validSortBys = ['owner', 'title', 'review_id', 'category', 'comment_count', 'votes', 'created_at'];
     await isValidQuery(sort_by, validSortBys);
 
@@ -22,15 +30,13 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
         qryStr += `WHERE category = $${queryValues.length} `;
     }
 
-    if (time) {
-        if(!/^\d+$/.test(time)) {
-            return Promise.reject({ status: 400, msg : "time must be a positive integer of minutes" })
-        }
-        time = parseInt(time);
+    if(period) {
+        queryValues.push(minutes || hours || days || months);
         if (!category) {
-            qryStr += `WHERE reviews.created_at > current_timestamp - interval '${time} minutes' `;
-        } else
-            qryStr += `AND reviews.created_at > current_timestamp - interval '${time} minutes' `;
+                    //casts constructed string into type interval...
+                    qryStr += `WHERE reviews.created_at > current_timestamp - ($${queryValues.length} || ' ${period}')::interval `;
+                } else
+                    qryStr += `AND reviews.created_at > current_timestamp - ($${queryValues.length} || ' ${period}')::interval `;
     }
 
     qryStr += `GROUP BY reviews.review_id

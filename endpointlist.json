@@ -24,7 +24,10 @@
                     "order",
                     "limit",
                     "p",
-                    "time"
+                    "minutes",
+                    "hours",
+                    "days",
+                    "months"
                 ],
                 "exampleResponse": {
                     "reviews": [

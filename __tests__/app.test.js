@@ -1429,69 +1429,128 @@ describe('GET /api/comments/:username/reviews', () => {
     })
 })
 
-//how to insert data into query? new Date(currentTImeLess5mins) not working due to invalid format!?
+//how to insert time data into query? new Date(currentTImeLess5mins) not working due to invalid format!?
+// let currentTimeLess5Mins = new Date()-300000;
+// let currentTimeLess8mins = new Date()-480000;
+// let currentTimeLess12mins = new Date()-720000;
+
 describe('GET api/reviews', () => {
-    test('status 200 - Added ?time=10 query to allow user to select minutes ago', async () => {
-        let currentTimeLess5Mins = new Date()-300000;
-        let currentTimeLess8mins = new Date()-480000;
-        let currentTimeLess12mins = new Date()-720000;
-        const response = await request(app).get('/api/reviews?time=10').expect(200);
+    test('status 200 - Added ?minutes= query to allow user to select minutes ago', async () => {
+        const response = await request(app).get('/api/reviews?minutes=10').expect(200);
         expect(response.body.reviews).toHaveLength(0);
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
-        const response2 = await request(app).get('/api/reviews?time=10').expect(200);
+        const response2 = await request(app).get('/api/reviews?minutes=10').expect(200);
         expect(response2.body.reviews).toHaveLength(1);
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
-        const response3 = await request(app).get('/api/reviews?time=10').expect(200);
+        const response3 = await request(app).get('/api/reviews?minutes=10').expect(200);
         expect(response3.body.reviews).toHaveLength(3);
     })
-    test('status 200 - Added ?time=10 query works with category query too', async () => {
-        let currentTimeLess5Mins = new Date()-300000;
-        let currentTimeLess8mins = new Date()-480000;
-        let currentTimeLess12mins = new Date()-720000;
-        const response = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+    test('status 200 - Added ?minutes=10 query works with category query too', async () => {
+        const response = await request(app).get('/api/reviews?minutes=10&category=dexterity').expect(200);
         expect(response.body.reviews).toHaveLength(0);
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
-        const response2 = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+        const response2 = await request(app).get('/api/reviews?minutes=10&category=dexterity').expect(200);
         expect(response2.body.reviews).toHaveLength(1);
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'euro game')`)
         await db.query(`INSERT INTO reviews (title, owner, review_body, category)
         VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
-        const response3 = await request(app).get('/api/reviews?time=10&category=dexterity').expect(200);
+        const response3 = await request(app).get('/api/reviews?minutes=10&category=dexterity').expect(200);
         expect(response3.body.reviews).toHaveLength(2);
     })
     test('status 200 - works for different time limits', async () => {
-        //Date of earliest test data review in January
+        //date of earliest 2021 review created_by in test data
         let testDate = new Date(1610010368077);
         let currentDate = new Date();
         //extra 5 mins to account for any delays
         let minutesAgo = Math.floor((currentDate-testDate)/1000/60) + 5
-        const response = await request(app).get(`/api/reviews?time=${minutesAgo}&limit=15`).expect(200);
+        const response = await request(app).get(`/api/reviews?minutes=${minutesAgo}&limit=15`).expect(200);
         expect(response.body.reviews).toHaveLength(11);
         
     })
-    test('status 400 - no negative times', async () => {
-        const response = await request(app).get('/api/reviews?time=-10').expect(400);
-        expect(response.body.message).toBe('time must be a positive integer of minutes')
+    test('status 200 - returns empty array for negative minutess', async () => {
+        const response = await request(app).get('/api/reviews?minutes=-10').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
     })
-    test('status 400 - no decimal times', async () => {
-        const response = await request(app).get('/api/reviews?time=10.5').expect(400);
-        expect(response.body.message).toBe('time must be a positive integer of minutes')
+    test('status 400 - Invalid minutes data', async () => {
+        const response = await request(app).get('/api/reviews?minutes=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type')
     })
-    test('status 400 - no non-integer times', async () => {
-        const response = await request(app).get('/api/reviews?time=NOPE').expect(400);
-        expect(response.body.message).toBe('time must be a positive integer of minutes')
-    })
-    test('status 200 - Valid time constraint with no reviews returns empty array', async () => {
-        const response = await request(app).get('/api/reviews?time=3').expect(200);
+    test('status 200 - Valid minutes constraint with no reviews returns empty array', async () => {
+        const response = await request(app).get('/api/reviews?minutes=3').expect(200);
         expect(response.body.reviews).toHaveLength(0);
         expect(response.body.reviews).toBeInstanceOf(Array);
+    })
+    test('status 200 - Added ?hours= query to allow user to select hours ago', async () => {
+        const response = await request(app).get('/api/reviews?hours=1').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response2 = await request(app).get('/api/reviews?hours=10').expect(200);
+        expect(response2.body.reviews).toHaveLength(1);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response3 = await request(app).get('/api/reviews?hours=10').expect(200);
+        expect(response3.body.reviews).toHaveLength(3);
 
+        //date of earliest 2021 review created_by in test data
+        let testDate = new Date(1610010368077);
+        let currentDate = new Date();
+        let hoursAgo = Math.floor((currentDate-testDate)/1000/60/60) + 5
+        const response4 = await request(app).get(`/api/reviews?hours=${hoursAgo}&limit=15`).expect(200);
+        expect(response4.body.reviews).toHaveLength(14);
+    })
+    test('status 200 - Added ?months= query to allow user to select months ago', async () => {
+        const response = await request(app).get('/api/reviews?months=1').expect(200);
+        expect(response.body.reviews).toHaveLength(0);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        const response2 = await request(app).get('/api/reviews?months=1').expect(200);
+        expect(response2.body.reviews).toHaveLength(1);
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+        await db.query(`INSERT INTO reviews (title, owner, review_body, category)
+        VALUES ('random title', 'mallionaire', 'a test review body', 'dexterity')`)
+
+        //date of earliest 2021 review created_by in test data
+        let testDate = new Date(1610010368077);
+        let currentDate = new Date();
+        //extra 2 months to account for estimation errors - next closest date in test data is 4 months earlier
+        let monthsAgo = Math.floor((currentDate-testDate)/1000/60/60/24/31) + 2;
+        const response3 = await request(app).get(`/api/reviews?months=${monthsAgo}&limit=15`).expect(200);
+        expect(response3.body.reviews).toHaveLength(14);
+    })
+
+    test('status 400 - Cannot query more than one time period at a time', async () => {
+        const response = await request(app).get('/api/reviews?months=1&hours=2').expect(400);
+        expect(response.body.message).toBe('Only one time period can be provided')
+    })
+    test('status 400 - Cannot query more than one time period at a time', async () => {
+        const response = await request(app).get('/api/reviews?minutes=1&hours=2').expect(400);
+        expect(response.body.message).toBe('Only one time period can be provided')
+    })
+    test('status 400 - Cannot query more than one time period at a time', async () => {
+        const response = await request(app).get('/api/reviews?days=1&months=2').expect(400);
+        expect(response.body.message).toBe('Only one time period can be provided')
+    })
+    test('status 400 - Invalid hours data', async () => {
+        const response = await request(app).get('/api/reviews?hours=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type')
+    })
+    test('status 400 - Invalid days data', async () => {
+        const response = await request(app).get('/api/reviews?days=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type')
+    })
+    test('status 400 - Invalid months data', async () => {
+        const response = await request(app).get('/api/reviews?months=NOPE').expect(400);
+        expect(response.body.message).toBe('Invalid data type')
     })
 })
 

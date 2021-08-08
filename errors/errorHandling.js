@@ -24,6 +24,8 @@ exports.PSQLerrorHandling = (err, req, res, next) => {
         res.status(400).send( { message : "Null value not allowed" })
     } else if(err.code === '23505') { //Updating username with a username that already exists (duplicate key value violates unique constraint "users_pkey")
         res.status(400).send( { message : "A property has failed its requirement to be unique"})
+    } else if(err.code === '22007') { //invalidfor type 'interval' (when setting time limit of search)
+        res.status(400).send( { message : 'Invalid data type' })
     }
     else next(err);
 }
