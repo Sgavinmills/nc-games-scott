@@ -10,6 +10,8 @@ app.use('/api', apiRouter);
 //error handling
 app.all('/*', invalidRoute);
 
+
+
 app.use(customErrorHandling);
 app.use(PSQLerrorHandling);
 app.use(serverErrorHandling);

@@ -11,6 +11,7 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
             return Promise.reject( { status : 400, msg : "Only one time period can be provided" })
         } else period = minutes ? 'minutes' : hours ? 'hours' : days ? 'days' : 'months'; 
     }
+
     const validSortBys = ['owner', 'title', 'review_id', 'category', 'comment_count', 'votes', 'created_at'];
     await isValidQuery(sort_by, validSortBys);
 
@@ -33,7 +34,7 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
     if(period) {
         queryValues.push(minutes || hours || days || months);
         if (!category) {
-                    //casts constructed string into type interval...
+                    //:: casts constructed string into required type interval. || is concatenation in psql
                     qryStr += `WHERE reviews.created_at > current_timestamp - ($${queryValues.length} || ' ${period}')::interval `;
                 } else
                     qryStr += `AND reviews.created_at > current_timestamp - ($${queryValues.length} || ' ${period}')::interval `;
