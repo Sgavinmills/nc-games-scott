@@ -58,6 +58,10 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
     queryValues.pop();
     const qryResponseAll = await db.query(withoutLimitAndOffsetQryStr, queryValues);
 
+    if(qryResponseAll.rows.length > 0 && qryResponse.rows.length === 0) {
+        return Promise.reject( { status: 404, msg: "Page doesn't exist" })
+    }
+
     return { reviews: qryResponse.rows, total_count: qryResponseAll.rows.length }
 
 }

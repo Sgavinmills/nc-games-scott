@@ -579,7 +579,15 @@ describe('GET /api/reviews Pagination', () => {
 
     })
 
+    test('status 404 - Page number doesnt exist', async () => {
+        const response = await request(app).get('/api/reviews?p=1000').expect(404);
+        expect(response.body.message).toBe(`Page doesn't exist`);
+        
+    })
+
 })
+
+
 
 describe('GET /api/reviews/:review_id/comments Pagination', () => {
     test('status 200 - allows limit query', async () => {
