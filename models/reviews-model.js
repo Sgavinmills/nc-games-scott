@@ -21,7 +21,7 @@ const selectReviews = async (sort_by = 'created_at', order, category, limit = 10
     } else direction = order;
 
 
-    let qryStr = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, COUNT(comment_id) AS comment_count
+    let qryStr = `SELECT owner, title, reviews.review_id, category, review_img_url, reviews.created_at, reviews.votes, reviews.review_body, COUNT(comment_id) AS comment_count
     FROM reviews LEFT JOIN comments ON reviews.review_id = comments.review_id `;
 
     const queryValues = [];
