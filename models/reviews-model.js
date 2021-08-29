@@ -134,7 +134,7 @@ const updateReviewsById = async (params, requestBody) => {
             const response = await db.query(`DELETE FROM votes
                                             WHERE review_id = $1`, [review_id]);
 
-            qryValues.push(-1);
+            qryValues.push(vote_type === 'up' ? -1 : 1);
             qryStr += `votes = 
             (CASE WHEN (votes + $${qryValues.length}) >= 0
                 THEN (votes + $${qryValues.length}) ELSE 0 END) `
