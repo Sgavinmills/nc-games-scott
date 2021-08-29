@@ -465,55 +465,59 @@ describe('GET /api/users/:username', () => {
 
 describe('PATCH /api/comments/:comment_id', () => {
     test('status 200 - responds with updated comment', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 5 }).expect(200);
+        const response = await request(app).patch('/api/comments/1').send({ voted_by : 'bainesface', vote_type : 'up' }).expect(200);
         expect(response.body.comments).toBeInstanceOf(Object);
         expect(response.body.comments).toEqual({
             comment_id: 1,
             author: 'bainesface',
             review_id: 2,
-            votes: 21,
+            votes: 17,
             created_at: '2017-11-22T12:43:33.389Z',
             body: 'I loved this game too!'
         })
     })
-    test('status 200 - negative votes dont go below 0', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ inc_votes: -50 }).expect(200);
-        expect(response.body.comments).toBeInstanceOf(Object);
-        expect(response.body.comments).toEqual({
-            comment_id: 1,
-            author: 'bainesface',
-            review_id: 2,
-            votes: 0,
-            created_at: '2017-11-22T12:43:33.389Z',
-            body: 'I loved this game too!'
-        })
-    })
+  
 
     test('status 400 - Invalid coment_id data type', async () => {
-        const response = await request(app).patch('/api/comments/NOPE').send({ inc_votes: 10 }).expect(400);
+        const response = await request(app).patch('/api/comments/NOPE').send({ voted_by : 'mallionaire', vote_type : 'down' }).expect(400);
         expect(response.body.message).toBe('Invalid data type');
     })
     test('status 404 - Valid but non-existent commen_id', async () => {
-        const response = await request(app).patch('/api/comments/9999').send({ inc_votes: 10 }).expect(404);
-        expect(response.body.message).toBe('9999 not found');
+        const response = await request(app).patch('/api/comments/9999').send({ voted_by : 'mallionaire', vote_type : 'up' }).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
     })
     test('status 400 - Missing inc_votes property', async () => {
         const response = await request(app).patch('/api/comments/1').send({}).expect(400);
         expect(response.body.message).toBe('no required properties provided');
     })
     test('status 400 - Additional properties sent', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 10, something: 'else' }).expect(400);
+        const response = await request(app).patch('/api/comments/1').send({ vote_type : 'up', voted_by : 'mallionaire', something: 'else' }).expect(400);
         expect(response.body.message).toBe('Too many properties provided');
     })
-    test('status 400 - inc_votes provided with invalid data type', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ inc_votes: 'nope' }).expect(400);
-        expect(response.body.message).toBe('Invalid data type');
+    test('status 400 - vote_type provided with invalid value', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ vote_type: 'nope', voted_by : 'mallionaire' }).expect(400);
+        expect(response.body.message).toBe(`vote_type must be 'up' or 'down'`);
     })
-    test('status 400 - inc_votes cannot be null', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ inc_votes: null }).expect(400);
+    test('status 400 - voted_by cannot be null', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ voted_by: null, vote_type : 'up' }).expect(400);
         expect(response.body.message).toBe('Null value not allowed')
 
     })
+    test('status 400 - vote_type cannot be null', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ voted_by: 'mallionaire', vote_type : null }).expect(400);
+        expect(response.body.message).toBe('Null value not allowed')
+
+    })
+
+    test('status 404 - username doesnt exis ', async () => {
+        const response = await request(app).patch('/api/comments/1').send({ voted_by: 'mallionafefire', vote_type : 'up' }).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found')
+
+    })
+
+    //votetype and voted_by not null and are valid/existent
+    
+
 
 })
 
@@ -1115,18 +1119,18 @@ describe('PATCH /api/comments/:comment_id', () => {
         expect(dbQry.rows[0].body).toEqual('This is a new comment body');
     })
     test('status 200 - Body and votes can be changed in one query', async () => {
-        const response = await request(app).patch('/api/comments/1').send({ body: "This is a new comment body", inc_votes: 10 }).expect(200);
+        const response = await request(app).patch('/api/comments/1').send({ body: "This is a new comment body", voted_by: 'bainesface', vote_type : 'up' }).expect(200);
         expect(response.body.comments).toEqual({
             comment_id: 1,
             author: "bainesface",
             review_id: 2,
-            votes: 26,
+            votes: 17,
             created_at: "2017-11-22T12:43:33.389Z",
             body: "This is a new comment body"
         })
         const dbQry = await db.query('SELECT * FROM comments WHERE comment_id=1');
         expect(dbQry.rows[0].body).toEqual('This is a new comment body');
-        expect(dbQry.rows[0].votes).toEqual(26);
+        expect(dbQry.rows[0].votes).toEqual(17);
     })
     test('status 400 - Body value too big', async () => {
         const response = await request(app).patch('/api/comments/1').send({ body: "T".repeat(5001) }).expect(400);

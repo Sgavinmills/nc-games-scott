@@ -19,7 +19,7 @@ const selectVotedReviewsByUser = async (username) => {
 
 const selectVotedCommentsByUser = async (username) => {
     
-    const qryResponse = await db.query(`SELECT comments.comment_id, comments.created_at, comments.votes, author, reviews.title AS review_title
+    const qryResponse = await db.query(`SELECT comments.comment_id, comments.created_at, comments.votes, author, reviews.title AS review_title, vote_type
                                   FROM comments JOIN votes
                                   ON comments.comment_id = votes.comment_id
                                   JOIN users
