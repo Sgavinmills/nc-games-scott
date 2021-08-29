@@ -3,7 +3,7 @@ const { checkExists } = require('../utils.js')
 
 const selectVotedReviewsByUser = async (username) => {
     
-    const qryResponse = await db.query(`SELECT reviews.review_id, title, category, created_at, votes, owner
+    const qryResponse = await db.query(`SELECT reviews.review_id, title, category, created_at, votes, owner, vote_type
                                   FROM reviews JOIN votes
                                   ON reviews.review_id = votes.review_id
                                   JOIN users
