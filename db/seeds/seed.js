@@ -46,7 +46,8 @@ const seed = async ( { categoryData, commentData, reviewData, userData, voteComm
     `vote_id SERIAL PRIMARY KEY`,
     `review_id INT REFERENCES reviews(review_id) ON DELETE CASCADE`,
     `comment_id INT REFERENCES comments(comment_id) ON DELETE CASCADE`,
-    `voted_by VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE`
+    `voted_by VARCHAR(200) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE`,
+    `vote_type VARCHAR(4) NOT NULL`
   ]
 
   //create tables
@@ -76,10 +77,10 @@ const seed = async ( { categoryData, commentData, reviewData, userData, voteComm
   //console.log(`Inserted data into ${insertedCommentData.length} tables`);
   
   const formattedVoteCommentData = formatData(voteCommentData);
-  const voteCommentTableCreation = ['votes', ['comment_id', 'voted_by'], formattedVoteCommentData];
+  const voteCommentTableCreation = ['votes', ['comment_id', 'voted_by', 'vote_type'], formattedVoteCommentData];
  
   const formattedVoteReviewData = formatData(voteReviewData);
-  const voteReviewTableCreation = ['votes', ['review_id', 'voted_by'], formattedVoteReviewData]
+  const voteReviewTableCreation = ['votes', ['review_id', 'voted_by', 'vote_type'], formattedVoteReviewData]
 
   insertedVoteReviewdata = await insertData([voteCommentTableCreation, voteReviewTableCreation]);
 

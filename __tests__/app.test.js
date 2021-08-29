@@ -90,7 +90,7 @@ describe('GET api/reviews/:review_id', () => {
 
 describe('PATCH api/reviews/:review_id', () => {
     test('status 200 - positive increase of votes', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 2 }).expect(200);
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by: 'mallionaire', vote_type: 'up' }).expect(200);
         expect(response.body.reviews).toBeInstanceOf(Object);
         expect(response.body.reviews).toEqual({
             review_id: 1,
@@ -102,12 +102,12 @@ describe('PATCH api/reviews/:review_id', () => {
             review_body: 'Farmyard fun!',
             category: 'euro game',
             created_at: '2021-01-18T10:00:20.514Z',
-            votes: 3,
+            votes: 0,
         })
 
     })
     test('status 200 - decreases votes for negative number', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: -1 }).expect(200);
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: -1, voted_by : 'bainesface', vote_type : 'down' }).expect(200);
         expect(response.body.reviews).toBeInstanceOf(Object);
         expect(response.body.reviews).toEqual({
             review_id: 1,
@@ -124,7 +124,7 @@ describe('PATCH api/reviews/:review_id', () => {
 
     })
     test('status 200 - sets votes to zero if number larger than current number', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: -3 }).expect(200);
+        const response = await request(app).patch('/api/reviews/1').send({ voted_by : 'bainesface', vote_type : 'down' }).expect(200);
         expect(response.body.reviews).toBeInstanceOf(Object);
         expect(response.body.reviews).toEqual({
             review_id: 1,
@@ -141,16 +141,13 @@ describe('PATCH api/reviews/:review_id', () => {
 
     })
 
-    test('status 400 - Invalid inc_votes value', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 'NOPE' }).expect(400);
-        expect(response.body.message).toBe('Invalid data type');
-    })
+ 
     test('status 400 - No inc_votes value on request body', async () => {
         const response = await request(app).patch('/api/reviews/1').send({ nothere: 'noo' }).expect(400);
         expect(response.body.message).toBe('no required properties provided');
     })
     test('status 200 - Additional propertys on request body', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 2, more: 'no' }).expect(200);
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, more: 'no', voted_by : 'bainesface', vote_type : 'up' }).expect(200);
         expect(response.body.reviews).toBeInstanceOf(Object);
         expect(response.body.reviews).toEqual({
             review_id: 1,
@@ -162,22 +159,18 @@ describe('PATCH api/reviews/:review_id', () => {
             review_body: 'Farmyard fun!',
             category: 'euro game',
             created_at: '2021-01-18T10:00:20.514Z',
-            votes: 3,
+            votes: 2,
         })
     })
     test('status 400 - invalid ID type', async () => {
-        const response = await request(app).patch('/api/reviews/NAME').send({ inc_votes: 2 }).expect(400);
+        const response = await request(app).patch('/api/reviews/NAME').send({ inc_votes: 1, voted_by : 'mallionaire', vote_type : 'up' }).expect(400);
         expect(response.body.message).toBe('Invalid data type');
     })
     test('status 404 - ID does not exist', async () => {
-        const response = await request(app).patch('/api/reviews/9999').send({ inc_votes: 2 }).expect(404);
-        expect(response.body.message).toBe('9999 not found');
+        const response = await request(app).patch('/api/reviews/9999').send({ inc_votes: 1, voted_by : 'mallionaire', vote_type : 'up' }).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
     })
-    test('status 400 - inc_votes cannot be null', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: null }).expect(400);
-        expect(response.body.message).toBe('Null value not allowed')
-
-    })
+ 
 })
 
 describe('GET api/reviews', () => {
@@ -583,7 +576,7 @@ describe('GET /api/reviews Pagination', () => {
     test('status 404 - Page number doesnt exist', async () => {
         const response = await request(app).get('/api/reviews?p=1000').expect(404);
         expect(response.body.message).toBe(`Page doesn't exist`);
-        
+
     })
 
 })
@@ -969,7 +962,7 @@ describe('PATCH /api/reviews/:review_id', () => {
         expect(dbQry.rows[0].review_body).toEqual('This is a new body');
     })
     test('status 200 - Body and votes can be changed in one query', async () => {
-        const response = await request(app).patch('/api/reviews/1').send({ review_body: "This is a new body", inc_votes: 1 }).expect(200);
+        const response = await request(app).patch('/api/reviews/1').send({ review_body: "This is a new body", inc_votes: 1, voted_by : 'mallionaire', vote_type : 'up' }).expect(200);
         expect(response.body.reviews).toEqual({
             review_id: 1,
             title: 'Agricola',
@@ -980,11 +973,11 @@ describe('PATCH /api/reviews/:review_id', () => {
             review_body: 'This is a new body',
             category: 'euro game',
             created_at: '2021-01-18T10:00:20.514Z',
-            votes: 2
+            votes: 0
         })
         const dbQry = await db.query('SELECT * FROM reviews WHERE review_id=1');
         expect(dbQry.rows[0].review_body).toEqual('This is a new body');
-        expect(dbQry.rows[0].votes).toEqual(2);
+        expect(dbQry.rows[0].votes).toEqual(0);
 
 
     })
@@ -1010,6 +1003,100 @@ describe('PATCH /api/reviews/:review_id', () => {
         expect(response.body.message).toBe('Null value not allowed')
 
     })
+
+    test('status 200 - can associate a vote with a user', async () => {
+
+        const response = await request(app).patch('/api/reviews/1').send({ voted_by : 'bainesface', vote_type: 'down' }).expect(200);
+        expect(response.body.reviews).toBeInstanceOf(Object);
+        expect(response.body.reviews).toEqual({
+            review_id: 1,
+            title: 'Agricola',
+            designer: 'Uwe Rosenberg',
+            owner: 'mallionaire',
+            review_img_url:
+                'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+            review_body: 'Farmyard fun!',
+            category: 'euro game',
+            created_at: '2021-01-18T10:00:20.514Z',
+            votes: 0,
+        })
+        const dbQryResponse = await db.query(`SELECT * FROM votes WHERE voted_by = 'bainesface'`);
+        expect(dbQryResponse.rows.length).toBe(10);
+        expect(dbQryResponse.rows[9]).toEqual({
+            vote_id: 30,
+            review_id: 1,
+            comment_id: null,
+            voted_by: 'bainesface',
+            vote_type: 'down'
+        })
+    
+
+    })
+
+  
+
+    test('status 400 - if any inc votes property is set all the others must be present', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, vote_type: 'down' }).expect(400);
+        expect(response.body.message).toBe('voted_by property required');
+        const response3 = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by: 'mallionaire' }).expect(400);
+        expect(response3.body.message).toBe('vote_type property required');
+       
+
+    })
+
+    
+
+    test('status 404 - username not found', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'banksy', vote_type: 'down' }).expect(404);
+        expect(response.body.message).toBe('One of your values is required to already exist in the database but could not be found');
+    })
+
+    test('status 200 - voting twice deletes previous vote (ie cancel the vote', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: 'up'}).expect(200);
+        const dbQryResponse = await db.query(`SELECT * FROM votes WHERE voted_by = 'bainesface'`);
+        expect(dbQryResponse.rows.length).toBe(10);
+        
+        const response2 = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: 'up'  }).expect(200);
+        const dbQryResponse2 = await db.query(`SELECT * FROM votes WHERE voted_by = 'bainesface'`);
+        expect(dbQryResponse2.rows.length).toBe(9);
+        
+
+    })
+
+    test('status 200 - downvoting on an upvoted review updates the vote type', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: 'up'}).expect(200);
+        const dbQryResponse = await db.query(`SELECT * FROM votes WHERE voted_by = 'bainesface'`);
+        expect(dbQryResponse.rows.length).toBe(10);
+        
+        const response2 = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: 'down'  }).expect(200);
+        const dbQryResponse2 = await db.query(`SELECT * FROM votes WHERE voted_by = 'bainesface'`);
+        expect(dbQryResponse2.rows.length).toBe(10);
+        expect(dbQryResponse2.rows[9]).toEqual({
+            vote_id: 30,
+            review_id: 1,
+            comment_id: null,
+            voted_by: 'bainesface',
+            vote_type: 'down'
+        })
+    })
+    
+    test('status 400 - invalid vote_type', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: 'upp'}).expect(400);
+        expect(response.body.message).toBe(`vote_type must be 'up' or 'down'` )
+    })
+
+    test('status 400  - null vote type', async () => {
+        const response = await request(app).patch('/api/reviews/1').send({ inc_votes: 1, voted_by : 'bainesface', vote_type: null}).expect(400);
+        expect(response.body.message).toBe(`Null value not allowed` )
+    })
+
+    //invalid vote type
+    //vote type null
+
+    // test('status 404 - Username param does not exist', async () => {
+    //     const response = await request(app).patch('/api/users/TheKing').send({ name: "Tryant" }).expect(404);
+    //     expect(response.body.message).toBe('TheKing not found')
+    // })
 
 })
 
@@ -1477,10 +1564,10 @@ describe('GET api/reviews', () => {
         let testDate = new Date(1610010368077);
         let currentDate = new Date();
         //extra 5 mins to account for any delays
-        let minutesAgo = Math.floor((currentDate-testDate)/1000/60) + 5
+        let minutesAgo = Math.floor((currentDate - testDate) / 1000 / 60) + 5
         const response = await request(app).get(`/api/reviews?minutes=${minutesAgo}&limit=15`).expect(200);
         expect(response.body.reviews).toHaveLength(11);
-        
+
     })
     test('status 200 - returns empty array for negative minutess', async () => {
         const response = await request(app).get('/api/reviews?minutes=-10').expect(200);
@@ -1512,7 +1599,7 @@ describe('GET api/reviews', () => {
         //date of earliest 2021 review created_by in test data
         let testDate = new Date(1610010368077);
         let currentDate = new Date();
-        let hoursAgo = Math.floor((currentDate-testDate)/1000/60/60) + 5
+        let hoursAgo = Math.floor((currentDate - testDate) / 1000 / 60 / 60) + 5
         const response4 = await request(app).get(`/api/reviews?hours=${hoursAgo}&limit=15`).expect(200);
         expect(response4.body.reviews).toHaveLength(14);
     })
@@ -1532,7 +1619,7 @@ describe('GET api/reviews', () => {
         let testDate = new Date(1610010368077);
         let currentDate = new Date();
         //extra 2 months to account for estimation errors - next closest date in test data is 4 months earlier
-        let monthsAgo = Math.floor((currentDate-testDate)/1000/60/60/24/31) + 2;
+        let monthsAgo = Math.floor((currentDate - testDate) / 1000 / 60 / 60 / 24 / 31) + 2;
         const response3 = await request(app).get(`/api/reviews?months=${monthsAgo}&limit=15`).expect(200);
         expect(response3.body.reviews).toHaveLength(14);
     })
@@ -1571,4 +1658,3 @@ describe('GET api/reviews', () => {
 
 
 
-    

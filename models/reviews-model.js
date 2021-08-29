@@ -94,25 +94,67 @@ const selectReviewsByIdOrTitle = async (review_id_or_title) => {
 }
 
 const updateReviewsById = async (params, requestBody) => {
-    const { inc_votes, review_body } = requestBody;
+    const { review_body, voted_by, vote_type } = requestBody;
     const { review_id } = params;
     const providedProps = Object.keys(requestBody);
 
 
-    await noRequiredPropertys(['inc_votes', 'review_body'], providedProps);
-    await checkForNulls([review_body, inc_votes]);
+    await noRequiredPropertys(['voted_by', 'vote_type', 'review_body'], providedProps);
+    await checkForNulls([review_body, voted_by, vote_type]);
     const qryValues = [review_id];
     let qryStr = `UPDATE reviews SET `;
+    if(voted_by || vote_type) {
+        await checkMissingProperty(['vote_type', 'voted_by'], providedProps)
+        //check if user has already voted - query the votes table for review_id and voted_by.
+        //ifalready exists then if vote type is same as passed in vote type then delete the vote
+        //if vote type doesnt match then update the vote type
+        const validTypes = ['up', 'down'];
+        if(!validTypes.includes(vote_type)) {
+            return Promise.reject({ status: 400, msg: `vote_type must be 'up' or 'down'` })
 
-    if (inc_votes) {
-        qryValues.push(inc_votes);
-        qryStr += `votes = 
-        (CASE WHEN (votes + $${qryValues.length}) >= 0
-         THEN (votes + $${qryValues.length}) ELSE 0 END) `
+        }
+       
+        const checkResponse = await db.query(`SELECT vote_type FROM votes 
+                                              WHERE review_id = $1 AND voted_by = $2
+                                              `, [review_id, voted_by])
+        if(checkResponse.rows.length === 0) {
+            const qryResponse = await db.query(`INSERT INTO votes
+                                                (review_id, voted_by, vote_type)
+                                                VALUES
+                                                ($1,$2,$3)`, [review_id, voted_by, vote_type])
+            
+            qryValues.push(vote_type === 'up' ? 1 : -1);
+            qryStr += `votes = 
+            (CASE WHEN (votes + $${qryValues.length}) >= 0
+            THEN (votes + $${qryValues.length}) ELSE 0 END) `
+                                                
+        } else  
+            if(checkResponse.rows[0].vote_type === vote_type) {
+            //delete the vote
+            const response = await db.query(`DELETE FROM votes
+                                            WHERE review_id = $1`, [review_id]);
+
+            qryValues.push(-1);
+            qryStr += `votes = 
+            (CASE WHEN (votes + $${qryValues.length}) >= 0
+                THEN (votes + $${qryValues.length}) ELSE 0 END) `
+                                    
+        } else {
+            //update vote type
+            const response = await db.query(`UPDATE votes
+                                             SET vote_type = $1
+                                             WHERE review_id = $2`, [vote_type, review_id])
+
+            qryValues.push(vote_type === 'up' ? 2 : -2);
+            qryStr += `votes = 
+            (CASE WHEN (votes + $${qryValues.length}) >= 0
+            THEN (votes + $${qryValues.length}) ELSE 0 END) `
+                                     
+        } 
     }
 
     if (review_body) {
-        if (inc_votes)
+        if (vote_type)
             qryStr += ', '
         qryValues.push(review_body);
         qryStr += `review_body = $${qryValues.length} `
@@ -120,12 +162,16 @@ const updateReviewsById = async (params, requestBody) => {
 
 
     qryStr += `WHERE review_id = $1 RETURNING *;`
+
     const qryResponse = await db.query(qryStr, qryValues);
 
 
     if (qryResponse.rows.length === 0) {
         return Promise.reject({ status: 404, msg: `${review_id} not found` })
     }
+
+    
+
     return qryResponse.rows[0];
 }
 
