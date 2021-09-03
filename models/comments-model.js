@@ -95,7 +95,7 @@ const updateCommentById = async (comment_id, reqBody) => {
 
 const selectReviewsByUserComments = async (username)  =>{
     
-    const qryResponse = await db.query(`SELECT reviews.review_id, reviews.title, reviews.category,reviews.created_at,reviews.votes, reviews.owner
+    const qryResponse = await db.query(`SELECT reviews.review_id, reviews.title, reviews.category,reviews.created_at,reviews.votes, reviews.owner, reviews.review_body
                                         FROM reviews
                                         JOIN comments
                                         ON reviews.review_id = comments.review_id
