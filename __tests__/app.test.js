@@ -436,13 +436,24 @@ describe('GET /api/users', () => {
         const response = await request(app).get('/api/users').expect(200);
         expect(response.body.users).toHaveLength(4);
         expect(response.body.users).toEqual([
-            { username: 'mallionaire' },
-            { username: 'philippaclaire9' },
-            { username: 'bainesface' },
-            { username: 'dav3rid' }
+          expect.objectContaining({ username: 'mallionaire' }),
+          expect.objectContaining({ username: 'philippaclaire9' }),
+          expect.objectContaining({ username: 'bainesface' }),
+          expect.objectContaining({ username: 'dav3rid' })
         ])
     })
 })
+
+// expect(review).toEqual(expect.objectContaining({
+//     owner: expect.any(String),
+//     title: expect.any(String),
+//     review_id: expect.any(Number),
+//     category: expect.any(String),
+//     review_img_url: expect.any(String),
+//     created_at: expect.any(String),
+//     votes: expect.any(Number),
+//     comment_count: expect.any(String)
+// }))
 
 describe('GET /api/users/:username', () => {
     test('status 200 - responds with a user object', async () => {

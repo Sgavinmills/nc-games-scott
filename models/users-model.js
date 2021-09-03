@@ -3,7 +3,7 @@ const { updateTable, checkForNulls, checkExtraProperties, noRequiredPropertys, c
 
 
 const selectUsers = async () => {
-    const qryResponse = await db.query('SELECT username FROM users');
+    const qryResponse = await db.query('SELECT * FROM users');
     return qryResponse.rows;
 }
 
