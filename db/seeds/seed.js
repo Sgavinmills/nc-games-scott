@@ -1,4 +1,4 @@
-const db = require('../../db/connection.js');a
+const db = require('../../db/connection.js');
 const { createRefObj, updateObjectPropertyFromRef, formatData } = require('../utils/data-manipulation.js');
 const { dropTables, insertData, createTables } = require('../utils/manageTables.js');
 
