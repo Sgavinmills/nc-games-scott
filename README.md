@@ -17,7 +17,7 @@ The source code can be viewed and downloaded from [github](https://github.com/Sg
 
 The server is intended to mimick a real world backend service. It is designed as a board-game review service, it contains tables for reviews, comments, users, categories and votes - all of which can be queried through the API. 
 
-This project was created by me as part of the back-end section of the Northcoders bootcamp. It uses the MVC design pattern and is fully RESTful. It was built using full TDD.
+This project was created by me as part of the back-end section of the Northcoders bootcamp. This REST API was built using the MVC design pattern and was built using full TDD.
 
 Database creation and seeding scripts are included in the github repository
 
