@@ -18,6 +18,13 @@ describe('GET /api', () => {
     })
 })
 
+describe('GET /api/restaurants', () => {
+    test('status 200 - returns a list of restuarants', async () => {
+        const response = await request(app).get('/api/restaurants').expect(200);
+        expect(response.body.restaurants).toEqual({});
+    })
+})
+
 describe('GET /api/an-invalid-route', () => {
     test('status 404 - returns route not found message', async () => {
         const response = await request(app).get('/NOPE').expect(404);
