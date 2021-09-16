@@ -39,6 +39,9 @@ apiRouter.get('/restaurants', (req, res) => {
         console.log(response.data);
         res.status(200).send({restaurants: response.data});
     })
+    .catch(e => {
+        console.log(e);
+    })
 })
 
 
