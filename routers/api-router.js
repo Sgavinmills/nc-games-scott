@@ -22,14 +22,17 @@ apiRouter.use('/votes', votesRouter);
 
 apiRouter.get('/restaurants', (req, res) => {
     const reviewsAPI = axios.create({
-        baseURL: "https://api.yelp.com/v3/businesses/",
+        baseURL: "https://api.yelp.com/v3/businesses/search",
     });
     const API_KEY = process.env.REACT_APP_API_KEY;
-
-    const response = reviewsAPI.get('/search?location=Manchester', {
-        // params: {
-          
-        // },
+    const response = reviewsAPI.get('', {
+        params: {
+          location : req.query.location,
+          radius : req.query.radius,
+          limit : req.query.limit,
+          sort_by : req.query.sort_by,
+          price : req.query.price,
+        },
         headers: {
             Authorization : `Bearer ${API_KEY}`
         }
