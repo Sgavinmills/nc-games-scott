@@ -32,6 +32,7 @@ apiRouter.get('/restaurants', (req, res) => {
           limit : req.query.limit,
           sort_by : req.query.sort_by,
           price : req.query.price,
+          offset : req.query.offset,
         },
         headers: {
             Authorization : `Bearer ${API_KEY}`
